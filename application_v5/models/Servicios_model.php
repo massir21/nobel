@@ -56,6 +56,9 @@ class Servicios_model extends CI_Model
         if (isset($parametros['solo_padre'])) {
             $busqueda .= " AND servicios.padre = 0";
         }
+        if (isset($parametros['disponible_sin_presupuesto'])) {
+            $busqueda .= " AND servicios_familias.disponible_sin_presupuesto = 1";
+        }
 
         // ... Leemos los registros
         $sentencia_sql = "SELECT servicios.id_servicio,servicios.nombre_servicio,
@@ -66,11 +69,13 @@ class Servicios_model extends CI_Model
     servicios.id_usuario_modificacion,servicios.fecha_modificacion,
     servicios.borrado,servicios.id_usuario_borrado,servicios.fecha_borrado,
     servicios_familias.nombre_familia,servicios.color,
-    servicios.padre, servicios.parte_padre, servicios.rellamada /* AÑADIDO PARA RELLAMADAS */
+    servicios.padre, servicios.parte_padre, servicios.rellamada,
+    servicios_familias.disponible_sin_presupuesto 
     FROM servicios
     LEFT JOIN servicios_familias ON servicios_familias.id_familia_servicio =
     servicios.id_familia_servicio
     WHERE servicios.borrado = 0 " . $busqueda . " ORDER BY nombre_familia,nombre_servicio ";
+   
         $datos = $AqConexion_model->select($sentencia_sql, $parametros);
 
         return $datos;
