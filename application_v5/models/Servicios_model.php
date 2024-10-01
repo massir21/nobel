@@ -1,6 +1,7 @@
 <?php
 /*
  * ALTER TABLE servicios ADD maxdescuento DECIMAL(6,2) DEFAULT 100 AFTER precio_proveedor ;
+ * ALTER TABLE `servicios_familias` ADD `disponible_sin_presupuesto` BOOLEAN NOT NULL DEFAULT FALSE AFTER `debug`; 
  */
 class Servicios_model extends CI_Model
 {
@@ -176,6 +177,20 @@ class Servicios_model extends CI_Model
             return 0;
         }
     }
+    
+    function actualizar_disponibilidad($parametros)
+    {
+        $AqConexion_model = new AqConexion_model();
+        $registro['disponible_sin_presupuesto'] = $parametros['disponibilidad'];
+        $registro['fecha_modificacion'] = date("Y-m-d H:i:s");
+        $registro['id_usuario_modificacion'] = $this->session->userdata('id_usuario');
+        
+        $where['id_familia_servicio'] = $parametros['id'];
+        
+        $AqConexion_model->update('servicios_familias', $registro, $where);
+        
+        return 1;
+    }
 
     function borrar_servicio($parametros)
     {
@@ -230,7 +245,8 @@ class Servicios_model extends CI_Model
     SF.id_usuario_creacion,SF.fecha_creacion,
     SF.id_usuario_modificacion,SF.fecha_modificacion,
     SF.borrado,SF.id_usuario_borrado,SF.fecha_borrado,
-    SF.nombre_familia,SF.citas_online, SF.rellamada /* AÑADIDO PARA RELLAMADAS */   
+    SF.nombre_familia,SF.citas_online, SF.rellamada, /* AÑADIDO PARA RELLAMADAS */   
+    SF.disponible_sin_presupuesto
     /* AÑADIDO PARA RELLAMADAS */
     FROM servicios_familias AS SF        
     WHERE SF.borrado = 0 " . $busqueda . " ORDER BY nombre_familia ";
@@ -255,13 +271,14 @@ class Servicios_model extends CI_Model
             $registro['rellamada'] = $parametros['rellamada'];
         }
         /* AÑADIDO PARA RELLAMADAS */
-        //
+        $registro['disponible_sin_presupuesto'] = isset($parametros['disponible_sin_presupuesto']);
+
         $registro['fecha_creacion'] = date("Y-m-d H:i:s");
         $registro['id_usuario_creacion'] = $this->session->userdata('id_usuario');
         $registro['fecha_modificacion'] = date("Y-m-d H:i:s");
         $registro['id_usuario_modificacion'] = $this->session->userdata('id_usuario');
         $registro['borrado'] = 0;
-
+        
         $AqConexion_model->insert('servicios_familias', $registro);
 
         $sentenciaSQL = "select max(id_familia_servicio) as id_familia_servicio
@@ -288,8 +305,12 @@ class Servicios_model extends CI_Model
         if (isset($parametros['rellamada'])) {
             $registro['rellamada'] = $parametros['rellamada'];
         }
+        
         /* AÑADIDO PARA RELLAMADAS */
         //
+        
+        $registro['disponible_sin_presupuesto'] = isset($parametros['disponible_sin_presupuesto']);
+        
         $registro['fecha_modificacion'] = date("Y-m-d H:i:s");
         $registro['id_usuario_modificacion'] = $this->session->userdata('id_usuario');
 

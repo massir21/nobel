@@ -144,6 +144,7 @@
                         <th style="display: none;">ID</th>
                         <th>Nombre Familia</th>
                         <th>Rellamada</th>
+                        <th>Sin presuesto</th>
                         <th></th>
                         <th></th>
                     </tr>
@@ -164,6 +165,17 @@
                                             <input type="number" min="0" data-id_servicio_familia="<?=$row['id_familia_servicio']?>" class="form-control form-control-sm" value="<?=$row['rellamada']?>">
 					                        <div class="input-group-append">
                                                 <button type="button" class="btn btn-sm btn-icon btn-warning" data-actualizar-rellamada="servicio_familia" data-id="<?=$row['id_familia_servicio']?>" data-bs-toggle="tooltip" aria-label="Guardar valor rellamada" title="Guardar valor rellamada" ><i class="fas fa-save"></i></button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group w-100px">
+                                            <select data-id_servicio_familia_disponibilidad="<?=$row['id_familia_servicio']?>" class="form-control form-control-sm">
+                                                <option value="0" <?php if ( !$row['disponible_sin_presupuesto'] ) echo 'selected'; ?>>No</option>
+                                                <option value="1" <?php if (  $row['disponible_sin_presupuesto'] ) echo 'selected'; ?>>Si</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <button type="button" class="btn btn-sm btn-icon btn-warning" data-actualizar-disponibilidad-sin-presu="servicio_familia_disponibilidad" data-id="<?=$row['id_familia_servicio']?>" data-bs-toggle="tooltip" aria-label="Guardar valor disponibilidad sin presupuesto" title="Guardar valor disponibilidad sin presupuesto" ><i class="fas fa-save"></i></button>
                                             </div>
                                         </div>
                                     </td>
@@ -238,5 +250,48 @@
 				})
 			}
 		})
+    })
+    
+    $(document).on('click', '[data-actualizar-disponibilidad-sin-presu]', function(){
+        var tipo = $(this).attr('data-actualizar-disponibilidad-sin-presu');
+        var id = $(this).attr('data-id');
+        var disponibilidad = $('[data-id_'+tipo+'="'+id+'"]').val();
+        var formData = new FormData();
+        
+        formData.append("id", id);
+        formData.append("disponibilidad", disponibilidad);
+        formData.append("tipo", tipo);
+        $.ajax({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            method: 'post',
+            url: '<?php echo base_url() ?>Servicios/actualizarDisponibilidadSinPresu',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(resp) {
+                if (resp == false) {
+                    Swal.fire({
+                        title: 'Error',
+                        willClose: function() {},
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Actualizado',
+                        willClose: function() {
+                            
+                        },
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    type: 'error',
+                    title: 'Oops...',
+                    text: 'Ha ocurrido un error'
+                })
+            }
+        })
     })
 </script>

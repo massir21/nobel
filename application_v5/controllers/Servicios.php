@@ -273,6 +273,22 @@ class Servicios extends CI_Controller
         $response = ['success' => ($result == 1) ? true : false];
         echo json_encode($response);
     }
+    
+    function actualizarDisponibilidadSinPresu()
+    {
+        // ... Comprobamos la sesion del cliente
+        $ok_ticket = $this->Ticket_model->recoger_ticket($this->session->userdata('ticket'));
+        if ($ok_ticket == 0) {
+            header("Location: " . RUTA_WWW);
+            exit;
+        }
+    
+        $parametros = $_POST;
+        $result = $this->Servicios_model->actualizar_disponibilidad($parametros);
+        // recalcular la liquidacion
+        $response = ['success' => ($result == 1) ? true : false];
+        echo json_encode($response);
+    }
 
     /*
     public function addHijosServicios()
