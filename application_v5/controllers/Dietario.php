@@ -3639,6 +3639,7 @@ $sy = imagesy($estampa);
         $data['justificante_pagado']=0;
         $data['comisionfinanciacion']=0;
         $data['id_usuario_pagado']=0;
+        $data['estado']='Pagado';
         $data['devuelto']=0;
         $data['debug']=0;
         $data['facturado']=0;
