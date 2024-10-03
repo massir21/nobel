@@ -3,9 +3,13 @@
      data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="225px"
      data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle">
     <div class="app-sidebar-logo px-6" id="kt_app_sidebar_logo">
+        <?php if ( $this->session->userdata('id_perfil') != PERFIL_DOCTOR ){ ?>
         <a href="<?= base_url() ?>site" class="">
             <img alt="Logo" src="<?= base_url() ?>assets_v5/media/logos/logo-dorado-sm.png" class="h-65px"/>
         </a>
+        <?php } else { ?>
+            <img alt="Logo" src="<?= base_url() ?>assets_v5/media/logos/logo-dorado-sm.png" class="h-65px"/>
+        <?php } ?>
         <div id="kt_app_sidebar_toggle"
              class="app-sidebar-toggle btn btn-icon btn-shadow btn-sm btn-color-muted btn-active-color-primary body-bg h-30px w-30px position-absolute top-50 start-100 translate-middle rotate"
              data-kt-toggle="true" data-kt-toggle-state="active" data-kt-toggle-target="body"
@@ -122,6 +126,8 @@
                                 </div>
                             <?php }
                         }
+                        
+                        if ( PERFIL_MASTER == $this->session->userdata('id_perfil') ){ 
                         ?>
                                  <div data-kt-menu-trigger="click" class="menu-item here menu-accordion">
 									<span class="menu-link">
@@ -133,17 +139,17 @@
 									</span>
                                     <div class="menu-sub menu-sub-accordion">
                                     <div class="menu-item">
-                                                                    <a class="menu-link"
-                                                                       href="<?php echo base_url(); ?>whatsApp">
-																		<span class="menu-bullet">
-																			<span class="bullet bullet-dot"></span>
-																		</span>
-                                                                        <span class="menu-title">Estado conexion a Api</span>
-                                                                    </a>
-                                                                </div>
+                                        <a class="menu-link" href="<?php echo base_url(); ?>whatsApp">
+											<span class="menu-bullet">
+												<span class="bullet bullet-dot"></span>
+											</span>
+                                            <span class="menu-title">Estado conexion a Api</span>
+                                        </a>
+                                    </div>
                                 </div>
                                 </div>
                         <?php
+                        }
             
                     }
                 } ?>

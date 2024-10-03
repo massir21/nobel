@@ -17,11 +17,11 @@ class Site extends CI_Controller
             header("Location: " . RUTA_WWW);
             exit;
         }
-        // usuario
-        /* $param = [];
-        $param['id_usuario'] =  $this->session->userdata('id_usuario');
-        $data['usuario'] = $this->Usuarios_model->leer_usuarios($param);*/
-
+        
+        if ($this->session->userdata('id_perfil') == PERFIL_DOCTOR) {
+            header("Location: " . RUTA_WWW . "agenda"); //Los doctores no tienen acceso a esta parte
+        }
+         
         // tareas diarias y pendientes pasadas asignadas
         $param = [];
         $param['id_usuario'] = $this->session->userdata('id_usuario');

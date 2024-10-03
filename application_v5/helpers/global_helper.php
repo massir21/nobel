@@ -456,6 +456,18 @@ function compararFechas($a, $b)
 	return $fechaA - $fechaB;
 }
 
+//Angel: Constantes útiles
+defined('PERFIL_MASTER') or define('PERFIL_MASTER', 0);
+defined('PERFIL_EMPLEADO') or define('PERFIL_EMPLEADO', 1);
+defined('PERFIL_RECEPCIONISTA') or define('PERFIL_RECEPCIONISTA', 2);
+defined('PERFIL_ENCARGADO') or define('PERFIL_ENCARGADO', 3);
+defined('PERFIL_GESTORIA') or define('PERFIL_GESTORIA', 4);
+defined('PERFIL_GESTORIA_LIMITADA') or define('PERFIL_GESTORIA_LIMITADA', 5);
+defined('PERFIL_DOCTOR') or define('PERFIL_DOCTOR', 6);
+defined('PERFIL_COMERCIAL') or define('PERFIL_COMERCIAL', 7);
+defined('PERFIL_PACIENTE_PRESU') or define('PERFIL_PACIENTE_PRESU', 8);
+
+
 //*** Alfonso */
 function show_array($array){
 	echo "<pre>";print_r($array);echo "</pre>";

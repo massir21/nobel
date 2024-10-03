@@ -54,15 +54,14 @@
 
 				<div class="app-navbar-item ms-1 ms-md-3" id="kt_header_user_menu_toggle">
     <!-- Icono de Inicio -->
+	<?php if ( $this->session->userdata('id_perfil') != PERFIL_DOCTOR ){ ?>
     <div class="d-flex align-items-center cursor-pointer symbol symbol-30px symbol-md-40px <?=($_SERVER['SERVER_NAME'] != 'extranet.clinicadentalnobel.es') ? 'text-white':''?>">
         <a href="<?= base_url() ?>site" class="d-flex align-items-center text-decoration-none">
-            <span class="ms-2" style ="    margin-right: 5px;
-    color: black;">Ir al inicio</span>
-	            <i class="fas fa-home fa-lg" style ="    margin-right: 5px;
-    color: black;"></i> 
-
+            <span class="ms-2" style ="margin-right: 5px; color: black;">Ir al inicio</span>
+	        <i class="fas fa-home fa-lg" style="margin-right: 5px; color: black;"></i> 
         </a>
     </div>
+	<?php } ?>
 
     <!-- Menú de Usuario -->
     <div class="cursor-pointer symbol symbol-30px symbol-md-40px <?=($_SERVER['SERVER_NAME'] != 'extranet.clinicadentalnobel.es') ? 'text-white':''?>" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">

@@ -52,22 +52,11 @@ class Acceso extends CI_Controller
 			
 			$usuario = $this->Acceso_model->NuevoAcceso($parametros);
 			
-			/*if ($this->session->userdata('id_usuario') == 125) {
-				header("Location: " . RUTA_WWW . "/estadisticas");
-			} else {
-				if ($this->session->userdata('id_perfil') == 4) {
-					header("Location: " . RUTA_WWW . "/caja/movimientos");
-				} else if ($this->session->userdata('id_perfil') == 5) {
-					header("Location: " . RUTA_WWW . "/caja/movimientos");
-				} else if ($this->session->userdata('id_perfil') == 6) {
-					header("Location: " . RUTA_WWW . "/agenda");
-				} else {
-					header("Location: " . RUTA_WWW . "/agenda");
-				}
-			}*/
-			if ($this->session->userdata('id_perfil') == 5) {
-				//header("Location: " . RUTA_WWW . "/caja/movimientos");
-				// CHAINS 2024026 - Cambiar el acceso del perfil 5
+			if ($this->session->userdata('id_perfil') == PERFIL_DOCTOR) {
+				header("Location: " . RUTA_WWW . "/agenda");
+			} 
+			else 
+			if ($this->session->userdata('id_perfil') == PERFIL_GESTORIA_LIMITADA) {
 				header("Location: " . RUTA_WWW . "/facturas");
 			} else {
 				header("Location: " . RUTA_WWW . "/site");
