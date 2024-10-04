@@ -19,7 +19,7 @@ class Site extends CI_Controller
         }
         
         if ($this->session->userdata('id_perfil') == PERFIL_DOCTOR) {
-            header("Location: " . RUTA_WWW . "agenda"); //Los doctores no tienen acceso a esta parte
+            header("Location: " . RUTA_WWW . "/agenda"); //Los doctores no tienen acceso a esta parte
         }
          
         // tareas diarias y pendientes pasadas asignadas
