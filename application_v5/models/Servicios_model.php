@@ -34,7 +34,7 @@ class Servicios_model extends CI_Model
         if (isset($parametros['id_empleado'])) {
             if ($parametros['id_empleado'] > 0) {
                 $busqueda .= " AND servicios.id_servicio in
-        (select id_servicio from usuarios_capacidades where id_usuario = @id_empleado) ";
+        (select id_servicio from usuarios_capacidades where id_usuario = @id_empleado AND borrado = 0) ";
             }
         }
 
