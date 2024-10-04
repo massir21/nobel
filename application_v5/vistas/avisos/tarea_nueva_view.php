@@ -14,7 +14,7 @@
                                 if ($empleados != 0) {
                                     foreach ($empleados as $key => $row) { ?>
                                         <option value='<?php echo $row['id_usuario']; ?>'>
-                                            <?php echo strtoupper($row['apellidos'].", ".$row['nombre']); ?>
+                                            <?php echo strtoupper($row['apellidos'].", ".$row['nombre'])." Centro: ".$row['nombre_centro']; ?>
                                         </option>
                                     <?php }
                                 }
