@@ -133,6 +133,10 @@
         }
     })
     //array php de centros a javascript
+    /*$('div.mombreempleado').on( "mouseover", function() {
+        let id=$( this ).attr("#data-id");
+        console.log(id);
+    } );*/
     var centros = <?php echo json_encode($centros); ?>;
 
 
@@ -167,6 +171,7 @@
                 name: "mes",
                 data: "mes",
                 render: function(data, type, row) {
+                    //console.log(row)
                     return row.mes;
                 }
             },
@@ -176,9 +181,10 @@
                 name: "empleado",
                 data: "empleado",
                 render: function(data, type, row) {
-                        console.log(row)
-                        return row.empleado + ' (' + row.nombre_centro_usuario + ')';
-
+                    let output = "";
+                    output= row.empleado + ' (' + row.nombre_centro_usuario + ')' + '<div class="nombreempleado"><span class="emp" data-id="'+row.id_liquidacion+'" id="emp_'+ row.id_liquidacion+  '"><i class="fas fa-tooth text-primary rounded-circle fs-3 border border-primary p-1" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-inverse"></i></span></div>';
+                    return output
+     
                 }
             },
             {
@@ -345,8 +351,14 @@
             },
         },
         headerCallback: function(thead, data, start, end, display) {},
-        createdRow: function(row, data, dataIndex) {},
+        createdRow: function(row, data, dataIndex) {
+
+        },
         drawCallback: function(settings) {
+            $('div.nombreempleado').each(function (){
+                let id = $(this).find(".emp").attr("data-id");
+                let numero = numero_diente(id)
+            });
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl, {
@@ -355,6 +367,14 @@
             })
         },
         initComplete: function() {
+            $('div.nombreempleado').each(function (){
+                let id = $(this).find(".emp").attr("data-id");
+                let numero = numero_diente(id)
+            });
+            /*$('div.nombreempleado').on( "mouseover", function() {
+                let id=$( this ).attr("data-id")
+                let numero = numero_diente(id)
+            } )*/
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl, {
@@ -363,7 +383,7 @@
             })
         },
     });
-    console.log(tabla_liquidacion)
+    //console.log(tabla_liquidacion)
     var buttons = new $.fn.dataTable.Buttons(tabla_liquidacion, {
         buttons: [{
             text: "Excel",
@@ -414,7 +434,28 @@
     $('#fecha_hasta').on('change', function() {
         tabla_liquidacion.draw();
     });
-
+    function numero_diente(id){
+        var output = "";
+        $.ajax({
+            url:  '<?php echo base_url(); ?>Liquidaciones/getDientes',
+            type: 'POST',
+            datatype: "json",
+            data: {
+                id_liquidacion : id
+            }, 
+            success: function(response) {
+                if(response.dientes==0){
+                    $('#emp_'+ response.id_liquidacion).hide();
+                }
+                else{
+                    let emp = $('#emp_'+ response.id_liquidacion);
+                    emp.attr('data-bs-toggle','tooltip');
+                    emp.attr('title','Diente: '+ response.dientes); 
+                }
+            }  
+        });
+        return output;
+    }
 
     $(document).on('click', '[data-ver]', function(event) {
         var button = $(this);
@@ -430,7 +471,6 @@
             $('#modal-liquidacion .modal-body').html(data);
         });
     });
-
     $(document).on('click', '[data-archivar]', function() {
         var button = $(this);
         Swal.fire({
@@ -552,7 +592,6 @@
             return false;
         });
     });
-
     $(document).on('click', '[data-del]', function() {
         var button = $(this);
         Swal.fire({
@@ -645,4 +684,5 @@
         });
         dt.ajax.reload();
     };
+
 </script>

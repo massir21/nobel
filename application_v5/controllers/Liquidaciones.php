@@ -1127,4 +1127,12 @@ class Liquidaciones extends CI_Controller
         $response = ['success' => true,'id_liquidacion_cita'=>$rtval];
         echo json_encode($response);
     }
+    public function getDientes(){
+    	$id_liquidacion=$this->input->post('id_liquidacion');
+    	$numero_de_diente=$this->Liquidaciones_model->getDientes($id_liquidacion);
+    	$response=['success' => true, 'dientes'=>$numero_de_diente,'id_liquidacion' =>$id_liquidacion];
+        $this->output->set_content_type('application/json');
+        $this->output->set_output(json_encode($response));
+        return;
+    }
 }

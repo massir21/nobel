@@ -1224,4 +1224,18 @@ class Liquidaciones_model extends CI_Model
         $datos = $AqConexion_model->select($sentencia_sql, $parametros);
         return $datos;
     }
+    public  function  getDientes($id_liquidacion){
+        $diente=0;
+        $AqConexion_model = new AqConexion_model();
+        $parametros=['id_liquidacion'=>$id_liquidacion];
+        $query="SELECT liquidaciones.id_liquidacion, presupuestos_items.dientes FROM liquidaciones, liquidaciones_citas, presupuestos_items WHERE liquidaciones.id_liquidacion=liquidaciones_citas.id_liquidacion AND liquidaciones_citas.id_presupuesto_item=presupuestos_items.id_presupuesto_item AND liquidaciones.id_liquidacion = @id_liquidacion";
+        $result = $AqConexion_model->select($query, $parametros);
+        foreach ($result as $key => $value) {
+            $diente=$value['dientes'];
+        }
+        if(empty($diente)){
+            $diente=0;
+        }
+        return $diente;
+    }
 }
