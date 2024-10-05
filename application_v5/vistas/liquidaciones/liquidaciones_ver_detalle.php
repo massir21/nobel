@@ -92,7 +92,7 @@
 					<?php foreach ($citas_liquidacion as $i => $value) { ?>
 						<tr>
 							<td><?= $value['fecha_cita'] ?></td>
-							<td><?= $value['servicio'] ?> <?= $value['familia'] ?> <?= $value['cliente'] ?></td>
+							<td><?= $value['servicio'] ?> <?= $value['familia'] ?> <?= $value['cliente'] ?> <?= ($value['dientes'] != '') ? $value['dientes'] : '-' ?></td>
 							<td><?= $value['pvp'] ?></td>
 							<td><?= $value['dto'] ?></td>
 							<td><?= $value['dtop'] ?></td>
