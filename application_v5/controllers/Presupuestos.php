@@ -2963,4 +2963,33 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
             redirect('Presupuestos');
 		}
 	}
-}
+	public function presupuesto_item_laboratorio_cero()
+	{
+		// ... Comprobamos la sesion del usuario
+		$ok_ticket = $this->Ticket_model->recoger_ticket($this->session->userdata('ticket'));
+		if ($ok_ticket == 0) {
+			header("Location: " . RUTA_WWW);
+			exit;
+		}
+
+		if ($this->session->userdata('id_perfil') <> 0) {
+			$this->session->set_userdata('msn_actionno', 'No puedes editar este item de presupuesto.');
+			redirect('presupuestos');
+		}
+		$id_presupuesto_item = $this->input->post('id_presupuesto_item');
+		$motivo = $this->input->post('motivo');
+		if (!empty($id_presupuesto_item)) {
+			$parametros['id_presupuesto_item'] = $id_presupuesto_item;
+			$presupuesto_item = $this->Presupuestos_model->leer_presupuestos_items($parametros,'DESC');
+			$id_presupuesto=$presupuesto_item[0]['id_presupuesto'];
+            $nota=$this->Presupuestos_model->guardarNotaPresupuesto($id_presupuesto,$id_presupuesto_item,$motivo);
+            $response = array('success' => true, 'error' => false);
+            $this->output->set_content_type('application/json');
+            $this->output->set_output(json_encode($response));
+        return;
+		} else {
+            $response = array('success' => false, 'error' => false);
+            $this->output->set_content_type('application/json');
+            $this->output->set_output(json_encode($response));
+		}
+	}}

@@ -139,7 +139,7 @@
 										<?= $value['familia'] ?>)
 										<?= ($value['dientes'] != '') ? 'D:' . $value['dientes'] : '' ?>
 										<?= ($value['id_presupuesto'] != '') ? '<br>Pto: #' . $value['id_presupuesto'] : '' ?>
-
+                                        <input type="hidden" name="id_presupuesto_item" value="<?= $value['id_presupuesto_item'] ?>">
 									</td>
 									<td export-data="<?= $value['pvp'] ?>" data-sort="<?= $value['pvp'] ?>">
 										<input type="number" class="form-control form-control-sm w-90px" step=".01" name="pvp" value="<?= $value['pvp'] ?>" data-ini="<?= $value['pvp'] ?>" data-id-presupuesto-item="<?= $value['id_presupuesto_item'] ?>">
@@ -316,7 +316,6 @@
 			</div>
 		</div>
 	</div>
-
 	<div class="modal fade" id="modal-liquidaciones" aria-labelledby="modal-liquidaciones" data-bs-focus="false" aria-hidden="true" tabindex="-1">
 		<div class="modal-dialog modal-xl" style="min-width: 95%;">
 			<div class="modal-content">
@@ -564,64 +563,154 @@
 		$(document).on('click', '[data-actualizar-row]', function(event) {
 			event.preventDefault();
 			var tr = $(this).closest('tr');
-			Swal.fire({
-				title: 'Actualizar cita',
-				html: '¿Guardar los datos de la cita?',
-				showCancelButton: true,
-				confirmButtonText: 'Si, guardar'
-			}).then((result) => {
-				if (result.value) {
-					var formData = new FormData();
-					var pvp = $(tr).find('[name="pvp"]').val();
-					var dto = $(tr).find('[name="dto"]').val();
-					var dtop = $(tr).find('[name="dtop"]').val();
-					var com_financiacion = $(tr).find('[name="com_financiacion"]').val();
-					var gastos_lab = $(tr).find('[name="gastos_lab"]').val();
-					var id_liquidacion_cita = $(tr).attr('data-liquidacion-cita');
+			var gastos_lab = $(tr).find('[name="gastos_lab"]').val();
+			if(gastos_lab>0){
+			    Swal.fire({
+				    title: 'Actualizar cita',
+				    html: '¿Guardar los datos de la cita?',
+				    showCancelButton: true,
+				    confirmButtonText: 'Si, guardar'
+			    }).then((result) => {
+				    if (result.value) {
+				    	var formData = new FormData();
+				    	var pvp = $(tr).find('[name="pvp"]').val();
+				    	var dto = $(tr).find('[name="dto"]').val();
+					    var dtop = $(tr).find('[name="dtop"]').val();
+					    var com_financiacion = $(tr).find('[name="com_financiacion"]').val();
+					    var gastos_lab = $(tr).find('[name="gastos_lab"]').val();
+					    var id_liquidacion_cita = $(tr).attr('data-liquidacion-cita');
 
-					formData.append('id_liquidacion_cita', id_liquidacion_cita);
-					formData.append('gastos_lab', gastos_lab);
-					formData.append('com_financiacion', com_financiacion);
-					formData.append('dtop', dtop);
-					formData.append('dto', dto);
-					formData.append('pvp', pvp);
+					    formData.append('id_liquidacion_cita', id_liquidacion_cita);
+					    formData.append('gastos_lab', gastos_lab);
+					    formData.append('com_financiacion', com_financiacion);
+					    formData.append('dtop', dtop);
+					    formData.append('dto', dto);
+					    formData.append('pvp', pvp);
 
-					$.ajax({
-						url: '<?= base_url() ?>Liquidaciones/cambios_datos_cita',
-						method: 'POST',
-						data: formData,
-						dataType: 'json',
-						processData: false, // Evita que jQuery procese los datos
-						contentType: false, // No establece automáticamente el tipo de contenido
-						success: function(response) {
-							if (response.success) {
-								Swal.fire({
-									type: 'success',
-									title: 'Guardado',
-									willClose: function() {
-										// Haz algo después de cerrar la alerta de éxito
-									},
-								});
-							} else {
-								Swal.fire({
-									title: 'Error al actualizar los cambios en el servidor. Inténtelo de nuevo o recargue la página.',
-									type: 'error',
-									willClose: function() {
+					    $.ajax({
+					    	url: '<?= base_url() ?>Liquidaciones/cambios_datos_cita',
+					    	method: 'POST',
+					    	data: formData,
+						    dataType: 'json',
+						    processData: false, // Evita que jQuery procese los datos
+						    contentType: false, // No establece automáticamente el tipo de contenido
+						    success: function(response) {
+							    if (response.success) {
+							    	Swal.fire({
+							    		type: 'success',
+							    		title: 'Guardado',
+								    	willClose: function() {
+								    		// Haz algo después de cerrar la alerta de éxito
+								    	},
+								    });
+							    } else {
+								    Swal.fire({
+									    title: 'Error al actualizar los cambios en el servidor. Inténtelo de nuevo o recargue la página.',
+									    type: 'error',
+									    willClose: function() {
 										// Haz algo después de cerrar la alerta de error
-									},
-								});
-							}
-						},
-						error: function() {
-							Swal.fire({
-								type: 'error',
-								title: 'Oops...',
-								text: 'Error en la solicitud AJAX'
-							});
-						}
-					});
-				}
-			});
+									    },
+								    });
+							    }
+						    },
+						    error: function() {
+							    Swal.fire({
+								    type: 'error',
+								    title: 'Oops...',
+								    text: 'Error en la solicitud AJAX'
+							    });
+						    }
+					    });
+				    }
+			    });
+			}
+			else{
+                Swal.fire({
+                    title: "Por favor ingrese el motivo de gastos de laboratorio en 0.00",
+                    input: "text",
+                    inputAttributes: {
+                        autocapitalize: "off"
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: "Guardar",
+                    showLoaderOnConfirm: true,
+                    preConfirm: async (login) => {
+                        try {
+                            if (!login) {
+                                return Swal.showValidationMessage("El comentario es obligatorio");
+                            }
+                            return login;
+                        } catch (error) {
+                           Swal.showValidationMessage('Validacion: '+ error);
+                        }
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                	    var motivo = result.value;
+				    	var id_presupuesto_item = $(tr).find('[name="id_presupuesto_item"]').val();
+			    	
+				    	var pvp = $(tr).find('[name="pvp"]').val();
+				    	var dto = $(tr).find('[name="dto"]').val();
+					    var dtop = $(tr).find('[name="dtop"]').val();
+					    var com_financiacion = $(tr).find('[name="com_financiacion"]').val();
+					    var gastos_lab = $(tr).find('[name="gastos_lab"]').val();
+					    var id_liquidacion_cita = $(tr).attr('data-liquidacion-cita');
+                        $.ajax({
+                            url:  '<?php echo base_url(); ?>Presupuestos/presupuesto_item_laboratorio_cero',
+                            type: 'POST',
+                            datatype: "json",
+                            data: {
+                            id_presupuesto_item : id_presupuesto_item,
+                            motivo : motivo
+                        }, 
+                        success: function(response) {
+                            console.log(response);
+                        }  
+                        });
+                        var formData = new FormData();
+					    formData.append('id_liquidacion_cita', id_liquidacion_cita);
+					    formData.append('gastos_lab', gastos_lab);
+					    formData.append('com_financiacion', com_financiacion);
+					    formData.append('dtop', dtop);
+					    formData.append('dto', dto);
+					    formData.append('pvp', pvp);
+
+					    $.ajax({
+					    	url: '<?= base_url() ?>Liquidaciones/cambios_datos_cita',
+					    	method: 'POST',
+					    	data: formData,
+						    dataType: 'json',
+						    processData: false, // Evita que jQuery procese los datos
+						    contentType: false, // No establece automáticamente el tipo de contenido
+						    success: function(response) {
+							    if (response.success) {
+							    	Swal.fire({
+							    		type: 'success',
+							    		title: 'Guardado',
+								    	willClose: function() {
+								    		// Haz algo después de cerrar la alerta de éxito
+								    	},
+								    });
+							    } else {
+								    Swal.fire({
+									    title: 'Error al actualizar los cambios en el servidor. Inténtelo de nuevo o recargue la página.',
+									    type: 'error',
+									    willClose: function() {
+										// Haz algo después de cerrar la alerta de error
+									    },
+								    });
+							    }
+						    },
+						    error: function() {
+							    Swal.fire({
+								    type: 'error',
+								    title: 'Oops...',
+								    text: 'Error en la solicitud AJAX'
+							    });
+						    }
+					    });
+                    });
+			}
 		});
 
 

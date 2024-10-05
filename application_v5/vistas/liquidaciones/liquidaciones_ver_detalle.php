@@ -102,12 +102,24 @@
 									$alertbg = '';
 									foreach ($palabras_clave as $palabra) {
 										if (str_contains($valor_servicio, $palabra)) {
-											if ($value['gastos_lab'] == 0) {
-												$alertbg = 'border: 6px solid red;';
+											if ($value['gastos_lab'] > 0) {
+												$alertbg = '';
+											}
+											else
+											{
+                                                 $alertbg='border: 6px solid red;';
 											}
 											break;
 										}
-									} ?>
+									} 
+											if ($value['gastos_lab'] > 0) {
+												$alertbg = '';
+											}
+											else
+											{
+                                                 $alertbg='border: 6px solid red;';
+											}
+									?>
 
 							<td style="<?= $alertbg ?> "><?= $value['gastos_lab'] ?></td>
 							<td><?= $value['com_financiacion'] ?></td>
