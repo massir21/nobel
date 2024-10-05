@@ -220,7 +220,7 @@
 													<?php foreach ($value['citas'] as $c => $cita) { ?>
 														<tr>
 															<td><?= $cita['fecha_cita'] ?></td>
-															<td><?= $cita['nombre_servicio'] ?></td>
+															<td><?= $cita['nombre_servicio'] ?> <?= ($value['dientes'] != '') ? $value['dientes'] : '-' ?></td>
 															<td><?= $cita['usuario'] ?></td>
 															<td><?= $cita['pvp'] ?></td>
 															<td><?= $cita['dto'] ?></td>

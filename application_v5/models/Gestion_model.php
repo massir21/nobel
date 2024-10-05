@@ -270,7 +270,7 @@ class Gestion_model extends CI_Model
 
     public function ctrlGLab($param)
     {
-        $this->db->select('liquidaciones_citas.*, servicios.nombre_servicio,(CONCAT(usuarios.nombre, " ", usuarios.apellidos)) AS usuario');
+        $this->db->select('liquidaciones_citas.*, servicios.nombre_servicio,(CONCAT(usuarios.nombre, " ", usuarios.apellidos)) AS usuario, presupuestos_items.dientes as dientes');
         
         if(isset($param['fecha_desde']) && $param['fecha_desde'] != ''){
             $this->db->where('liquidaciones_citas.fecha_cita >=', $param['fecha_desde'].' 00:00:00');
@@ -300,6 +300,7 @@ class Gestion_model extends CI_Model
 
 		$this->db->join('servicios','servicios.id_servicio = liquidaciones_citas.id_item','left');
         $this->db->join('usuarios','usuarios.id_usuario = liquidaciones_citas.id_usuario','left');
+        $this->db->join('presupuestos_items','presupuestos_items.id_presupuesto_item = liquidaciones_citas.id_presupuesto_item','left');
         $this->db->group_by('liquidaciones_citas.id_liquidacion_cita');
         $this->db->order_by('liquidaciones_citas.id_cliente','asc');
 		$this->db->order_by('liquidaciones_citas.fecha_cita','asc');
@@ -314,6 +315,7 @@ class Gestion_model extends CI_Model
             if(!array_key_exists($value['id_cliente'], $clientes)){
                 $client = $this->db->where('id_cliente', $value['id_cliente'])->get('clientes')->row_array();
                 $clientes[$value['id_cliente']] = $client;
+                $clientes[$value['id_cliente']]['dientes'] = $value['dientes'];
                 $clientes[$value['id_cliente']]['pvp'] = 0;
 				$clientes[$value['id_cliente']]['dto'] = 0;
 				$clientes[$value['id_cliente']]['dtop'] = 0;
