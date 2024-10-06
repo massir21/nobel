@@ -2992,4 +2992,28 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
             $this->output->set_content_type('application/json');
             $this->output->set_output(json_encode($response));
 		}
-	}}
+	}
+	public function presupuesto_cargar_comentario()
+	{
+		// ... Comprobamos la sesion del usuario
+		$ok_ticket = $this->Ticket_model->recoger_ticket($this->session->userdata('ticket'));
+		if ($ok_ticket == 0) {
+			header("Location: " . RUTA_WWW);
+			exit;
+		}
+		$parametros=['id_presupuesto_item' => $this->input->post('id_presupuesto_item')];
+        $presupuestos_items=$this->Presupuestos_model->leer_presupuestos_items($parametros);
+        foreach ($presupuestos_items as $key => $value) {
+        	$id_presupuesto=$value['id_presupuesto'];
+        }
+        $comentarios=$this->Presupuestos_model->cargarMotivoPresupuestoItem($id_presupuesto);
+        if(empty($comentarios)){
+        	$comentarios='Sin comentarios';
+        }
+        $response = array('success' => true, 'error' => false, 'comentarios'  => $comentarios,'id_presupuesto'=>$id_presupuesto);
+        $this->output->set_content_type('application/json');
+        $this->output->set_output(json_encode($response));
+        return;
+	}	
+	
+}

@@ -1312,8 +1312,10 @@ class Avisos extends CI_Controller
             $param['id_tarea'] = $value->id;
             $asignados = $this->Avisos_model->tarea_asignados($param);
             $cadena_array = [];
+            if(is_array($asignados)=='Array'){
             foreach ($asignados as $fila) {
                 $cadena_array[] = strtoupper($fila['nombre'] . " " . $fila['apellidos']);
+            }
             }
             $cadena = implode('<br>', $cadena_array);
             $result->data[$key]->quienes = $cadena;

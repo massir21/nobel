@@ -104,24 +104,27 @@
 										if (str_contains($valor_servicio, $palabra)) {
 											if ($value['gastos_lab'] > 0) {
 												$alertbg = '';
+												$show = '';
 											}
 											else
 											{
                                                  $alertbg='border: 6px solid red;';
+                                                 $show='id="gastosL_'.$value['id_liquidacion_cita'].'" class="gastosLab_rojo" data-id="'.$value['id_liquidacion_cita'].'"';
 											}
 											break;
 										}
-									} 
 											if ($value['gastos_lab'] > 0) {
 												$alertbg = '';
+												$show = '';
 											}
 											else
 											{
                                                  $alertbg='border: 6px solid red;';
+                                                 $show='id="gastosL_'.$value['id_presupuesto_item'].'" class="gastosLab_rojo" data-id="'.$value['id_presupuesto_item'].'"';
 											}
-									?>
-
-							<td style="<?= $alertbg ?> "><?= $value['gastos_lab'] ?></td>
+									} 
+     								?>
+							<td style="<?= $alertbg ?> "><span <?= $show ?>><?= $value['gastos_lab'] ?></span></td>
 							<td><?= $value['com_financiacion'] ?></td>
 							<td><?= $value['total'] ?></td>
 							<?php if ($this->session->userdata('id_perfil') == 0 || $this->session->userdata('id_perfil') == 3) { ?>
@@ -338,7 +341,22 @@
 				}
         }]
     }).container().appendTo($('#buttons_tags'));
-
+    $('.gastosLab_rojo').each(function(){
+    	var span=$(this);
+        var id_presupuesto_item = span.attr("data-id");
+        $.ajax({
+            url:  '<?php echo base_url(); ?>Presupuestos/presupuesto_cargar_comentario',
+            type: 'POST',
+            datatype: "json",
+            data: {
+                id_presupuesto_item : id_presupuesto_item,
+            }, 
+            success: function(response) {
+                span.attr('data-bs-toggle','tooltip');
+                span.attr('title','Motivo: '+ response.comentarios); 
+            }  
+        }); 
+    });
 	$('#tabla_citas').DataTable({
 		language: {
             "sProcessing": "Procesando...",
