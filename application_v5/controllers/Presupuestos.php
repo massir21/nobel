@@ -1518,7 +1518,8 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 		$ver_item_entrada = false;
 		$padres = [];
 		$servicios = [];
-
+		$notas_servicios = [];
+		
 		// CHAINS - 20240304 - Primero hacemos una primera barrida para los $items_entrada
 		$listadoParaMensualidades = [];
 		foreach ($servicios_items as $i => $value) {
@@ -1679,7 +1680,12 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 					}
 				}
 			}
+			
+			if ( $value['notas'] && !in_array($value['notas'], $notas_servicios) ){
+				$notas_servicios[] = $value['notas'];
+			}
 		}
+		
 		// Ajuste de las unidades de los padres:
 		foreach ($padres as $idpadre => $dientespadre) {
 			foreach ($dientespadre as $iddiente => $datadientespadre) {
@@ -1699,8 +1705,9 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 		$data['listaentradas'] = $listadoFinalEntradas;
 		$data['padres'] = $padres;
 		$data['servicios'] = $servicios;
+		$data['notas_servicios'] = $notas_servicios;
 		//  echo "<pre>";print_r($data);die();
-		//printr($servicios);
+		
 		$content_view = $this->load->view('pdf/presupuestos_pdf_view', $data, true);
 		$this->load->library('pdf');
 		$this->pdf->stream($content_view, "pr-" . $data['registro'][0]['id_cliente'] - $id_presupuesto . "-" . time() . ".pdf", array("Attachment" => false));

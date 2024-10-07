@@ -239,6 +239,7 @@ class Presupuestos_model extends CI_Model
             citas.id_usuario_empleado,
             servicios.padre,
             servicios.parte_padre,
+            servicios.notas,
             CONCAT(empleados.nombre, ' ', empleados.apellidos) As empleado,
             CASE
                 WHEN presupuestos_items.tipo_item = 'Producto' THEN productos.nombre_producto
