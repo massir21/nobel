@@ -593,6 +593,16 @@ function mostrar_dientes($desde, $hasta, $sentido, $alignTabla, $orientac, $dien
                 escrito a: administracion@clinicadentalnobel.es<br>Los descuentos/promociones de este presupuesto sólo son aplicables a la aceptación integra del tratamiento. En caso de no realizarse la totalidad por causas que no sean de índole medica, se aplicaran los precios de tarifa.<br>*Financiación sujeta a condiciones personales del paciente. Oferta no vinculante.<br>En caso de inicio del tratamiento indicado en el presupuesto, se considerará tácitamente aceptado el presupuesto y todas las condiciones descritas en el mismo.
             </p>
         </div>
+        
+        <?php if ( !empty($notas_servicios) ) { ?>
+        <div style="font-size: 9px; text-align: left;">
+            <?php
+            foreach ( $notas_servicios as $nota ){
+                echo '<p>'.$nota.'</p>';    
+            }
+            ?>
+        </div>
+        <?php } ?>
     </aside>
 
 </div>

@@ -343,7 +343,9 @@ class Agenda extends CI_Controller
                     unset($param);
                     $param['id_empleado'] = $parametros['id_empleado'];
                     $param['obsoleto'] = 0;
-                    $param['disponible_sin_presupuesto'] = true;
+                    if ( !isset($parametros['id_presupuesto']) ){
+                        $param['disponible_sin_presupuesto'] = true;
+                    }
                     $data['servicios'] = $this->Servicios_model->leer_servicios($param);
                 }
 
