@@ -1304,8 +1304,10 @@ class Presupuestos_model extends CI_Model
         $parametros['id_presupuesto']=$id_presupuesto;
         $sentencia_sql="SELECT * FROM presupuestos_notas WHERE id_presupuesto = @id_presupuesto";
         $datos = $AqConexion_model->select($sentencia_sql, $parametros);
+        if(!empty($datos)){
         foreach ($datos as $key => $value) {
             $comentarios = $value['comentarios'];
+        }
         }
         return $comentarios;     
     }
