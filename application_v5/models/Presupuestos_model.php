@@ -1294,6 +1294,7 @@ class Presupuestos_model extends CI_Model
         $AqConexion_model = new AqConexion_model();
         // ... Datos generales.
         $registro['id_presupuesto'] = $id_presupuesto;
+        $registro['id_presupuestos_item'] = $id_presupuesto_item;
         $registro['comentarios'] =  $motivo. ", Item de presupuesto # ".$id_presupuesto_item;
         $registro['estado'] =  'archivado';
         $AqConexion_model->insert('presupuestos_notas', $registro);
@@ -1306,9 +1307,22 @@ class Presupuestos_model extends CI_Model
         $sentencia_sql="SELECT * FROM presupuestos_notas WHERE id_presupuesto = @id_presupuesto";
         $datos = $AqConexion_model->select($sentencia_sql, $parametros);
         if(!empty($datos)){
-        foreach ($datos as $key => $value) {
-            $comentarios = $value['comentarios'];
+            foreach ($datos as $key => $value) {
+                $comentarios = $value['comentarios'];
+            }
         }
+        return $comentarios;     
+    }
+    function cargarComentarioPresupuestoItem($id_presupuesto_item){
+        $comentarios="";
+        $AqConexion_model = new AqConexion_model();
+        $parametros['id_presupuesto_item']=$id_presupuesto_item;
+        $sentencia_sql="SELECT * FROM presupuestos_notas WHERE id_presupuestos_item = @id_presupuesto_item";
+        $datos = $AqConexion_model->select($sentencia_sql, $parametros);
+        if(!empty($datos)){
+            foreach ($datos as $key => $value) {
+                $comentarios = $value['comentarios'];
+            }
         }
         return $comentarios;     
     }

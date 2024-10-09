@@ -640,7 +640,7 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 		$estado = $this->input->post('estado');
 		$dto_euros = $this->input->post('dto_euros');
 		$dto_100 = $this->input->post('dto_100');
-		$con_cuota = $this->input->post('con_cuota');
+		$con_cuota = $this->input->post('com_cuota');
 		$totalpresupuesto = $this->input->post('totalpresupuesto');
 		$cuotas = $this->input->post('cuotas');
 		$apertura = $this->input->post('apertura');
@@ -3013,11 +3013,11 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
         foreach ($presupuestos_items as $key => $value) {
         	$id_presupuesto=$value['id_presupuesto'];
         }
-        $comentarios=$this->Presupuestos_model->cargarMotivoPresupuestoItem($id_presupuesto);
+        $comentarios=$this->Presupuestos_model->cargarComentarioPresupuestoItem($id_presupuesto_item);
         if(empty($comentarios)){
         	$comentarios='Sin comentarios';
         }
-        $response = array('success' => true, 'error' => false, 'comentarios'  => $comentarios,'id_presupuesto'=>$id_presupuesto);
+        $response = array('success' => true, 'error' => false, 'comentarios'  => $comentarios,'id_presupuesto_item'=>$id_presupuesto_item);
         $this->output->set_content_type('application/json');
         $this->output->set_output(json_encode($response));
         return;

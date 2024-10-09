@@ -86,7 +86,6 @@
 				<div id="buttons"></div>
 			</div>
 		</div>
-
 		<div class="card-body pt-6">
 
 			<div class="table-responsive">
@@ -656,11 +655,11 @@
 					    var gastos_lab = $(tr).find('[name="gastos_lab"]').val();
 					    var id_liquidacion_cita = $(tr).attr('data-liquidacion-cita');
                         $.ajax({
-                            url:  '<?php echo base_url(); ?>Presupuestos/presupuesto_item_laboratorio_cero',
+                            url:  '<?php echo base_url(); ?>Liquidaciones/item_laboratorio_cero',
                             type: 'POST',
                             datatype: "json",
                             data: {
-                            id_presupuesto_item : id_presupuesto_item,
+                            id_liquidacion_cita : id_liquidacion_cita,
                             motivo : motivo
                         }, 
                         success: function(response) {
