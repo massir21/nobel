@@ -109,8 +109,7 @@ $autoload['model'] = array('Ticket_model', 'AqConexion_model', 'Acceso_model', '
     'Site_model', 'Usuarios_model', 'Servicios_model', 'Productos_model', 'Horarios_model',
     'Clientes_model', 'Capacidades_model', 'Pedidos_model', 'Agenda_model', 'Carnets_model',
     'Dietario_model', 'Caja_model', 'Estadisticas_model', 'Intercentros_model', 'Descuentos_model', 'TiposProveedores_model',
-    'Proveedores_model', 'GestionFacturas_model',
-						  'Tarifas_model','Laboratorios_model');
+    'Proveedores_model', 'GestionFacturas_model','Tarifas_model','Laboratorios_model','Aseguradoras_model');
 
 
 /* End of file autoload.php */

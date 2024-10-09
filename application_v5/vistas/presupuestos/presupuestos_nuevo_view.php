@@ -14,7 +14,7 @@
 <?php } ?>
 <div class="card card-flush">
     <div class="card-body pt-6">
-        <form name="form_presupuesto" id="form_presupuesto" action="<?php echo base_url(); ?>Presupuestos/crearPresupuesto" method="post" onsubmit="return EsOk2();">
+        <form name="form_presupuesto" id="form_presupuesto" action="<?php echo base_url(); ?>Presupuestos/crearPresupuesto" method="post" enctype="multipart/form-data" onsubmit="return EsOk2();">
             <div class="row mb-5 pb-5 align-items-end border-bottom">
                 <div class="col-md-3">
                     <label for="" class="form-label">Elige el cliente:</label>
@@ -74,9 +74,8 @@
             <?php
             // 20240201 - Chains Seleccionar tarifa
             ?>
-<div class="border-bottom mb-5 pb-5">
-    <div class="row">
-        <div class="col-md-3">
+    <div class="row mb-5 pb-5 border-bottom mb-5 pb-5">
+        <div style="display: none">
             <label for="id_tarifa" class="form-label">Tarifa:</label>
             <select class="form-select form-select-solid" id="id_tarifa" name="id_tarifa" required>
                 <option value="0">Base</option>
@@ -90,13 +89,42 @@
                 }
                 ?>
             </select>
+            <?php //Ocultado pero se sigue enviando el dato por compatibilidad */ ?>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-12">
             <label for="titulo" class="form-label">Título:</label>
             <input type="text" class="form-control form-control-solid" id="titulo" name="titulo" required>
         </div>
     </div>
-</div>
+    <?php if (isset($aseguradoras)) { ?> 
+    <div class="row border-bottom  mb-5 pb-5">
+       <div class="col-md-2">
+          <label class="form-label">Aplica a seguros</label>
+          <div class="form-check form-check-solid form-switch form-check-custom fv-row">
+                <input class="form-check-input w-45px h-30px" type="checkbox" id="mostrar_aseguradoras" name="mostrar_aseguradoras" value="1">
+                <label class="form-check-label" for="mostrar_aseguradoras"></label>
+          </div>
+       </div>
+        <div class="col-md-3 aplica_seguro" style="display: none">
+             <label for="" class="form-label">Elige la aseguradora:</label>
+             <select name="id_aseguradora" id="id_aseguradora" class="form-select form-select-solid" data-control="select2" data-placeholder="Elegir ...">
+                 <option value="">Selecciona una aseguradora</option>
+                     <?php
+                     foreach ($aseguradoras as $d => $aseguradora) { ?>
+                         <option value="<?= $aseguradora['id_aseguradora'] ?>"><?= $aseguradora['nombre_aseguradora']; ?></option>
+                     <?php } ?>
+             </select>
+         </div>
+         <div class="col-md-3 aplica_seguro" style="display: none">
+             <label for="formFile1" class="form-label">Tarjeta paciente</label>
+             <input class="form-control" type="file" id="formFile1" name="aseguradora_tarjeta_paciente">
+         </div>
+         <div class="col-md-3 aplica_seguro" style="display: none">
+             <label for="formFile2" class="form-label">Presupuesto aseguradora</label>
+             <input class="form-control" type="file" id="formFile2" name="aseguradora_presupuesto">
+         </div>
+    </div> 
+    <?php } ?>
             <?php
             // 20240201 - FIN Chains Seleccionar tarifa
             ?>
@@ -137,7 +165,7 @@
                         </div>
                         <div class="col-lg-1 col-xl-1">
                             <label for="" class="form-label">DTO %</label>
-                            <input type="number" name="servicioDescuento[]" id="servicioDescuento1" class="form-control form-control-solid servicioDescuento" value="0" step=".01" min="0" max="100" required />
+                            <input type="number" name="servicioDescuento[]" id="servicioDescuento1" class="form-control form-control-solid servicioDescuento servicioDescuentoPorcentaje" value="0" step=".01" min="0" max="100" required />
                         </div>
                         <div class="col-lg-1 col-xl-1">
                             <label for="" class="form-label">DTO €</label>
@@ -425,11 +453,18 @@
                     $("#servicioPrecio" + j).val(ar[i]['pvp']);
                 }
                 $("#servicioDescuento"+j).attr('max',ar[i]['maxdescuento']);
+                $("#servicioDescuento"+j).attr('max_original',ar[i]['maxdescuento']);
                 $("#servicioDescuentoE"+j).attr('max_dto_unidad',(ar[i]['pvp']*(ar[i]['maxdescuento']/100)));
+                $("#servicioDescuentoE"+j).attr('max_dto_unidad_original',(ar[i]['pvp']*(ar[i]['maxdescuento']/100)));
                 $("#servicioDescuentoE"+j).attr('max',(ar[i]['pvp']*(ar[i]['maxdescuento']/100)));
-
-
-
+                $("#servicioDescuentoE"+j).attr('max_original',(ar[i]['pvp']*(ar[i]['maxdescuento']/100)));
+                
+                if ( tiene_seguro() ){
+                  $("#servicioDescuento"+j).attr('max', '100'); 
+                  $("#servicioDescuentoE"+j).attr('max_dto_unidad', ar[i]['pvp']);
+                  $("#servicioDescuentoE"+j).attr('max', ar[i]['pvp']);
+                }
+                
                 $("#servicioNombre" + j).val(selected);
                 $("#servicioCantidad" + j).val(1)
             }
@@ -687,15 +722,54 @@
                 },'json')
             }
         });
-
+        
+        jQuery('#mostrar_aseguradoras').on('change', function(){
+           if ( !jQuery(this).is(":checked") ){
+              jQuery('.aplica_seguro').hide('slow');
+              restaurar_limite_descuentos();
+           }
+           else {
+              jQuery('.aplica_seguro').show('slow');
+              quitar_limite_descuentos();
+           }
+        });
+        
+        function quitar_limite_descuentos(){
+           jQuery('.servicioDescuentoPorcentaje').each( function(){
+              jQuery(this).attr('max', '100');
+           });
+        }
+        
+        function restaurar_limite_descuentos(){
+             
+             jQuery('.servicioDescuentoPorcentaje').each( function(){
+                jQuery(this).attr('max', jQuery(this).attr('max_original'));
+                
+                if ( jQuery(this).val() > jQuery(this).attr('max') ){
+                  jQuery(this).val(jQuery(this).attr('max'));
+                }
+             });
+             
+             jQuery('.servicioDescuentoEuros').each( function(){
+                 jQuery(this).attr('max', jQuery(this).attr('max_original'));
+                 jQuery(this).attr('max_dto_unidad', jQuery(this).attr('max_dto_unidad_original'));
+                 
+                 if ( jQuery(this).val() > jQuery(this).attr('max') ){
+                   jQuery(this).val(jQuery(this).attr('max'));
+                 }
+              });
+             
+          }
+          
+          function tiene_seguro(){
+             return jQuery('#mostrar_aseguradoras').is(":checked");
+          }
+          
         <?php
         if(isset($_GET['idcliente'])){
             ?>
             var $newOption = $("<option selected='selected'></option>").val("<?php echo $_GET['idcliente'];?>").text("<?php echo $_GET['cliente'];?>")
             $("#id_cliente").append($newOption).trigger('change');
-   //         $("#id_cliente").select2('data', { id:"<?php echo $_GET['idcliente'];?>", text: "<?php echo $_GET['cliente'];?>"});
-
-//            $("#id_cliente").select2("val", "<?php echo $_GET['idcliente'];?>");
         <?php
         }
         ?>
