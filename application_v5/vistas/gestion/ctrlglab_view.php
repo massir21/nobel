@@ -111,7 +111,6 @@
 						});
 					</script>
 				</div>
-
 				<div class="m-1">
 					<div class="input-group mb-3">
 						<span class="input-group-text">Estado</span>
@@ -160,6 +159,7 @@
 					</tr>
 				</thead>
 				<tbody>
+
 					<?php $i = 0;
 					foreach ($clientes as $key => $value) {
 						$i++; ?>
@@ -199,7 +199,6 @@
 											</li>
 										</ul>
 									</div>
-
 									<div id="cliente_liquidacion_<?= $value['id_cliente'] ?>" class="fs-6 p-10 collapse" data-bs-parent="#cliente_liquidacion" style="">
 										<div class="table-responsive">
 											<table class="align-middle border fs-6 mb-5 table table-bordered table-row-dashed table-sm table-striped">
@@ -220,7 +219,7 @@
 													<?php foreach ($value['citas'] as $c => $cita) { ?>
 														<tr>
 															<td><?= $cita['fecha_cita'] ?></td>
-															<td><?= $cita['nombre_servicio'] ?> <?= ($value['dientes'] != '') ? $value['dientes'] : '-' ?></td>
+															<td><?= $cita['nombre_servicio'] ?> <span  class="text-primary"><br>Diente: <?= ($value['dientes'] != '') ? $value['dientes'] : '-' ?></span></td>
 															<td><?= $cita['usuario'] ?></td>
 															<td><?= $cita['pvp'] ?></td>
 															<td><?= $cita['dto'] ?></td>
