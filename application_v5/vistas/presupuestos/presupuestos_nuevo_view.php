@@ -117,11 +117,11 @@
          </div>
          <div class="col-md-3 aplica_seguro" style="display: none">
              <label for="formFile1" class="form-label">Tarjeta paciente</label>
-             <input class="form-control" type="file" id="formFile1" name="aseguradora_tarjeta_paciente">
+             <input class="form-control" type="file" id="aseguradora_tarjeta_paciente_file" name="aseguradora_tarjeta_paciente">
          </div>
          <div class="col-md-3 aplica_seguro" style="display: none">
-             <label for="formFile2" class="form-label">Presupuesto aseguradora</label>
-             <input class="form-control" type="file" id="formFile2" name="aseguradora_presupuesto">
+             <label for="aseguradora_presupuesto_file" class="form-label">Presupuesto aseguradora</label>
+             <input class="form-control" type="file" id="aseguradora_presupuesto_file" name="aseguradora_presupuesto">
          </div>
     </div> 
     <?php } ?>
@@ -463,6 +463,11 @@
                   $("#servicioDescuento"+j).attr('max', '100'); 
                   $("#servicioDescuentoE"+j).attr('max_dto_unidad', ar[i]['pvp']);
                   $("#servicioDescuentoE"+j).attr('max', ar[i]['pvp']);
+                  
+                  quitar_limite_descuentos();
+                }
+                else {
+                    restaurar_limite_descuentos();
                 }
                 
                 $("#servicioNombre" + j).val(selected);
@@ -627,13 +632,58 @@
     <?php
     /* FIN CHAINS 20240202 - Recalcular cuando se cambia la tarifa */
     ?>
-
+    
+    function tiene_seguro(){
+        var condicion1 = jQuery('#mostrar_aseguradoras').is(":checked");
+        var condicion2 = jQuery('#id_aseguradora').val();
+        var condicion3 = jQuery('#aseguradora_tarjeta_paciente_file').val();
+        var condicion4 = jQuery('#aseguradora_presupuesto_file').val();
+        
+        return ( condicion1 && condicion2 && condicion3 && condicion4 );
+    }
+    
+    function quitar_limite_descuentos(){
+       jQuery('.servicioDescuentoPorcentaje').each( function(){
+          jQuery(this).attr('max', '100');
+       });
+    }
+    
+    function restaurar_limite_descuentos(){
+         
+         jQuery('.servicioDescuentoPorcentaje').each( function(){
+            jQuery(this).attr('max', jQuery(this).attr('max_original'));
+            
+            if ( jQuery(this).val() > jQuery(this).attr('max') ){
+              jQuery(this).val(jQuery(this).attr('max'));
+            }
+         });
+         
+        jQuery('.servicioDescuentoEuros').each( function(){
+            jQuery(this).attr('max', jQuery(this).attr('max_original'));
+            jQuery(this).attr('max_dto_unidad', jQuery(this).attr('max_dto_unidad_original'));
+             
+            if ( jQuery(this).val() > jQuery(this).attr('max') ){
+              jQuery(this).val(jQuery(this).attr('max'));
+            }
+        });
+       
+    }
+    
     $(document).on('input', '.sumrow input, #dto_euros, #dto_100, #com_cuota, #cuotas, #apertura, #anticipo_financiacion, .servicioDescuento', function() {
         calcular();
     });
 
     $(document).ready(function() {
-
+        
+        $('#mostrar_aseguradoras, #id_aseguradora, #aseguradora_tarjeta_paciente_file, #aseguradora_presupuesto_file').on('change', function(){
+            if ( tiene_seguro() ){
+                quitar_limite_descuentos();
+            }
+            else {
+                restaurar_limite_descuentos();
+            }
+        });
+        
         $(".serviciocantidadInput").on('change',function(){
             var maxDto1=$(this).closest('.sumrow').find('.servicioDescuentoEuros').attr('max_dto_unidad');
             var unidades=$(this).val();
@@ -734,37 +784,6 @@
            }
         });
         
-        function quitar_limite_descuentos(){
-           jQuery('.servicioDescuentoPorcentaje').each( function(){
-              jQuery(this).attr('max', '100');
-           });
-        }
-        
-        function restaurar_limite_descuentos(){
-             
-             jQuery('.servicioDescuentoPorcentaje').each( function(){
-                jQuery(this).attr('max', jQuery(this).attr('max_original'));
-                
-                if ( jQuery(this).val() > jQuery(this).attr('max') ){
-                  jQuery(this).val(jQuery(this).attr('max'));
-                }
-             });
-             
-             jQuery('.servicioDescuentoEuros').each( function(){
-                 jQuery(this).attr('max', jQuery(this).attr('max_original'));
-                 jQuery(this).attr('max_dto_unidad', jQuery(this).attr('max_dto_unidad_original'));
-                 
-                 if ( jQuery(this).val() > jQuery(this).attr('max') ){
-                   jQuery(this).val(jQuery(this).attr('max'));
-                 }
-              });
-             
-          }
-          
-          function tiene_seguro(){
-             return jQuery('#mostrar_aseguradoras').is(":checked");
-          }
-          
         <?php
         if(isset($_GET['idcliente'])){
             ?>

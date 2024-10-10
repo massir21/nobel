@@ -597,6 +597,9 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 			$data['mensaje'] = $this->session->userdata('mensaje');
 			$this->session->unset_userdata('mensaje');
 		}
+		
+		$data['aseguradoras'] = $this->Aseguradoras_model->getListadoAseguradoras();
+
 		// ... Viewer con el contenido
 		$data['pagetitle'] = 'Nuevo presupuesto';
 		$data['content_view'] = $this->load->view('presupuestos/presupuestos_nuevo_view', $data, true);
@@ -604,7 +607,7 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 		// ... Modulos del caja
 		$param_modulos['id_perfil'] = $this->session->userdata('id_perfil');
 		$data['modulos'] = $this->Usuarios_model->leer_modulos($param_modulos);
-
+		
 		// ... Pagina master
 		$permiso = $this->Acceso_model->TienePermiso($data['modulos'], 57);
 		if ($permiso) {
@@ -623,6 +626,7 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 			header("Location: " . RUTA_WWW);
 			exit;
 		}
+		
 		$this->form_validation->set_rules('id_cliente', 'Cliente', 'required');
 		$this->form_validation->set_rules('fecha_validez', 'Fecha de validez', 'required');
 		$this->form_validation->set_rules('estado', 'Estado', 'required');
@@ -757,6 +761,11 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 		}
 		$this->Presupuestos_model->recalcular_totales($id_presupuesto);
 		$this->session->set_userdata('msn_estado', 1);
+		
+		if ( $this->input->post('mostrar_aseguradoras') && $this->input->post('id_aseguradora') ){
+			$this->Aseguradoras_model->adjuntarFicheros($id_presupuesto, $this->input->post('id_aseguradora') );
+		}
+		
 		redirect('Presupuestos');
 	}
 

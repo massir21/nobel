@@ -85,45 +85,59 @@ class Aseguradoras_model extends CI_Model
         return 1;
     }
     
-    function adjuntarFicheros($id_presupuesto)
+    function adjuntarFicheros($id_presupuesto, $id_aseguradora)
     {
-        if ( isset($FILE['aseguradora_tarjeta_paciente']) && !$FILE['aseguradora_tarjeta_paciente']['error'] ){
+        $data = array(
+            'id_presupuesto' => $id_presupuesto,   
+            'id_aseguradora' => $id_aseguradora,   
+            'file_tarjeta' => '',
+            'file_presupuesto' => '',
+        );
+        
+        if ( isset($_FILES['aseguradora_tarjeta_paciente']) && !$_FILES['aseguradora_tarjeta_paciente']['error'] ){
             
-            $extension = pathinfo($FILE['aseguradora_tarjeta_paciente']['tmp_name'], PATHINFO_EXTENSION);
-            $nombre_limpio = $file['aseguradora_tarjeta_paciente']['name'];
+            $extension = pathinfo($_FILES['aseguradora_tarjeta_paciente']['tmp_name'], PATHINFO_EXTENSION);
+            $nombre_limpio = $_FILES['aseguradora_tarjeta_paciente']['name'];
             
             $this->load->helper('global_helper');
             $nombre_limpio = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $nombre_limpio);
             $nombre_limpio = limpiar_string($nombre_limpio);
             $nombre_limpio = str_replace(' ', '_', $nombre_limpio);
-            $final_name = 'presu'.$id_presupuesto.'_'.$nombre_limpio;
+            $final_name = 'presu'.$id_presupuesto.'_t_'.$nombre_limpio;
             
-            $directorioDestino = FCPATH . 'recursos/seguros/' . $centro_id . '/';
+            $directorioDestino = FCPATH . 'recursos/seguros/' . $id_aseguradora . '/';
             if (!is_dir($directorioDestino)) {
                 mkdir($directorioDestino, 0755, true);
             }
             
-            move_uploaded_file($file['aseguradora_tarjeta_paciente']['tmp_name'], $directorioDestino . $final_name);
+            if ( move_uploaded_file($_FILES['aseguradora_tarjeta_paciente']['tmp_name'], $directorioDestino . $final_name) ){
+                $data['file_tarjeta'] = $directorioDestino.$final_name;
+            }
         }
         
-        if ( isset($FILE['aseguradora_presupuesto']) && !$FILE['aseguradora_presupuesto']['error'] ){
+        if ( isset($_FILES['aseguradora_presupuesto']) && !$_FILES['aseguradora_presupuesto']['error'] ){
             
-            $extension = pathinfo($FILE['aseguradora_presupuesto']['tmp_name'], PATHINFO_EXTENSION);
-            $nombre_limpio = $file['aseguradora_presupuesto']['name'];
+            $extension = pathinfo($_FILES['aseguradora_presupuesto']['tmp_name'], PATHINFO_EXTENSION);
+            $nombre_limpio = $_FILES['aseguradora_presupuesto']['name'];
             
             $this->load->helper('global_helper');
             $nombre_limpio = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $nombre_limpio);
             $nombre_limpio = limpiar_string($nombre_limpio);
             $nombre_limpio = str_replace(' ', '_', $nombre_limpio);
-            $final_name = 'presu'.$id_presupuesto.'_'.$nombre_limpio;
+            $final_name = 'presu'.$id_presupuesto.'_p_'.$nombre_limpio;
             
-            $directorioDestino = FCPATH . 'recursos/seguros/' . $centro_id . '/';
+            $directorioDestino = FCPATH . 'recursos/seguros/' . $id_aseguradora . '/';
             if (!is_dir($directorioDestino)) {
                 mkdir($directorioDestino, 0755, true);
             }
             
-            move_uploaded_file($file['aseguradora_presupuesto']['tmp_name'], $directorioDestino . $final_name);
+            if ( move_uploaded_file($_FILES['aseguradora_presupuesto']['tmp_name'], $directorioDestino . $final_name) ){
+                $data['file_presupuesto'] = $directorioDestino.$final_name;
+            }
         }
+        
+        $AqConexion_model = new AqConexion_model();
+        $AqConexion_model->insert('seguros_archivos', $data);
     }
     
 }
