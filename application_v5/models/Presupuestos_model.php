@@ -1294,6 +1294,7 @@ class Presupuestos_model extends CI_Model
         $AqConexion_model = new AqConexion_model();
         // ... Datos generales.
         $registro['id_presupuesto'] = $id_presupuesto;
+        $registro['id_presupuestos_item'] = $id_presupuesto_item;
         $registro['comentarios'] =  $motivo. ", Item de presupuesto # ".$id_presupuesto_item;
         $registro['estado'] =  'archivado';
         $AqConexion_model->insert('presupuestos_notas', $registro);
