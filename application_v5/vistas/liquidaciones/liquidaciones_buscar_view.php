@@ -168,7 +168,7 @@
 
 									<td export-data="<?= $value['gastos_lab'] ?>" data-sort="<?= $value['gastos_lab'] ?>" style="width: 80px;">
 
-										<input type="number" class="form-control form-control-sm w-80px" step=".01" name="gastos_lab" value="<?= $value['gastos_lab'] ?>" data-ini="<?= $value['gastos_lab'] ?>" data-id-presupuesto-item="<?= $value['id_presupuesto_item'] ?>" style="<?= $alertbg ?> ">
+										<input type="number" class="form-control form-control-sm w-80px" step=".01" id="gastos_lab_<?= $value['id_liquidacion_cita'] ?>" name="gastos_lab" value="<?= $value['gastos_lab'] ?>" data-ini="<?= $value['gastos_lab'] ?>" data-id-presupuesto-item="<?= $value['id_presupuesto_item'] ?>" style="<?= $alertbg ?> ">
 									</td>
 									<td class="totalrow w-120px" export-data="<?= $value['total'] ?>">
 										<?= euros($value['total']) ?>
@@ -564,7 +564,6 @@
 			event.preventDefault();
 			var tr = $(this).closest('tr');
 			var gastos_lab = $(tr).find('[name="gastos_lab"]').val();
-			if(gastos_lab>0){
 			    Swal.fire({
 				    title: 'Actualizar cita',
 				    html: '¿Guardar los datos de la cita?',
@@ -623,94 +622,6 @@
 					    });
 				    }
 			    });
-			}
-			else{
-                Swal.fire({
-                    title: "Por favor ingrese el motivo de gastos de laboratorio en 0.00",
-                    input: "text",
-                    inputAttributes: {
-                        autocapitalize: "off"
-                    },
-                    showCancelButton: true,
-                    confirmButtonText: "Guardar",
-                    showLoaderOnConfirm: true,
-                    preConfirm: async (login) => {
-                        try {
-                            if (!login) {
-                                return Swal.showValidationMessage("El comentario es obligatorio");
-                            }
-                            return login;
-                        } catch (error) {
-                           Swal.showValidationMessage('Validacion: '+ error);
-                        }
-                    },
-                    allowOutsideClick: () => !Swal.isLoading()
-                }).then((result) => {
-                	    var motivo = result.value;
-				    	var id_presupuesto_item = $(tr).find('[name="id_presupuesto_item"]').val();
-			    	
-				    	var pvp = $(tr).find('[name="pvp"]').val();
-				    	var dto = $(tr).find('[name="dto"]').val();
-					    var dtop = $(tr).find('[name="dtop"]').val();
-					    var com_financiacion = $(tr).find('[name="com_financiacion"]').val();
-					    var gastos_lab = $(tr).find('[name="gastos_lab"]').val();
-					    var id_liquidacion_cita = $(tr).attr('data-liquidacion-cita');
-                        $.ajax({
-                            url:  '<?php echo base_url(); ?>Presupuestos/presupuesto_item_laboratorio_cero',
-                            type: 'POST',
-                            datatype: "json",
-                            data: {
-                            id_presupuesto_item : id_presupuesto_item,
-                            motivo : motivo
-                        }, 
-                        success: function(response) {
-                            console.log(response);
-                        }  
-                        });
-                        var formData = new FormData();
-					    formData.append('id_liquidacion_cita', id_liquidacion_cita);
-					    formData.append('gastos_lab', gastos_lab);
-					    formData.append('com_financiacion', com_financiacion);
-					    formData.append('dtop', dtop);
-					    formData.append('dto', dto);
-					    formData.append('pvp', pvp);
-
-					    $.ajax({
-					    	url: '<?= base_url() ?>Liquidaciones/cambios_datos_cita',
-					    	method: 'POST',
-					    	data: formData,
-						    dataType: 'json',
-						    processData: false, // Evita que jQuery procese los datos
-						    contentType: false, // No establece automáticamente el tipo de contenido
-						    success: function(response) {
-							    if (response.success) {
-							    	Swal.fire({
-							    		type: 'success',
-							    		title: 'Guardado',
-								    	willClose: function() {
-								    		// Haz algo después de cerrar la alerta de éxito
-								    	},
-								    });
-							    } else {
-								    Swal.fire({
-									    title: 'Error al actualizar los cambios en el servidor. Inténtelo de nuevo o recargue la página.',
-									    type: 'error',
-									    willClose: function() {
-										// Haz algo después de cerrar la alerta de error
-									    },
-								    });
-							    }
-						    },
-						    error: function() {
-							    Swal.fire({
-								    type: 'error',
-								    title: 'Oops...',
-								    text: 'Error en la solicitud AJAX'
-							    });
-						    }
-					    });
-                    });
-			}
 		});
 
 
@@ -784,8 +695,14 @@
 
 		$('[data-calcular-comisiones]').on('click', function() {
 			var idsLiquidacion = [];
+			var idsliq={};
 			tablacitas.rows().nodes().to$().find('input[name="ids_liquidacion[]"]:checked').each(function() {
 				idsLiquidacion.push($(this).val());
+				idsliq['id']=$(this).val();
+			});
+			$.each(idsliq, function(i, item) {
+                var gastos_lab = $("#gastos_lab_"+item).val();
+                console.log(item +  '  ' + gastos_lab);
 			});
 			if (idsLiquidacion.length > 0) {
 				var idsLiquidacionStr = idsLiquidacion.join(',');
@@ -827,7 +744,7 @@
 							row += '<td>' + comision_valoreuros.toFixed(2) + '€</td>';
 							row += '</tr>';
 							$('#tabla_comisiones tbody').append(row);
-							console.log(pvpacumulado + ' + ' + comision.pvpacumulado + ' = ')
+							//console.log(pvpacumulado + ' + ' + comision.pvpacumulado + ' = ')
 							pvpacumulado += comision_pvpacumulado;
 							totalapagar += comision_valoreuros;
 							//}

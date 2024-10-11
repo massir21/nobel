@@ -109,19 +109,10 @@
 											else
 											{
                                                  $alertbg='border: 6px solid red;';
-                                                 $show='id="gastosL_'.$value['id_liquidacion_cita'].'" class="gastosLab_rojo" data-id="'.$value['id_liquidacion_cita'].'"';
+                                                 $show='id="gastosL_'.$value['id_presupuesto_item'].'" class="gastosLab_rojo" data-id="'.$value['id_presupuesto_item'].'"';
 											}
 											break;
 										}
-											if ($value['gastos_lab'] > 0) {
-												$alertbg = '';
-												$show = '';
-											}
-											else
-											{
-                                                 $alertbg='border: 6px solid red;';
-                                                 $show='id="gastosL_'.$value['id_presupuesto_item'].'" class="gastosLab_rojo" data-id="'.$value['id_presupuesto_item'].'"';
-											}
 									} 
      								?>
 							<td style="<?= $alertbg ?> "><span <?= $show ?>><?= $value['gastos_lab'] ?></span></td>

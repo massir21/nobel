@@ -1517,7 +1517,6 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 		unset($param);
 		$param['id_presupuesto'] = $id_presupuesto;
 		$param['tipo_item'] = 'Servicio';
-		$param['aceptado'] = 1;
 		//$param['aceptado'] = 1;
 		/* CHAINS 20240218 - Se añade el parámetro para decidir la dirección de ordenado */
 		$servicios_items = $this->Presupuestos_model->leer_presupuestos_items($param, 'ASC');

@@ -193,7 +193,6 @@ class Presupuestos_model extends CI_Model
                     $busqueda .= " AND presupuestos_items.aceptado IN (1,2) ";
                     break;
                 default:
-                    $busqueda .= " AND presupuestos_items.aceptado = @aceptado ";
                     break;
             }
         }
