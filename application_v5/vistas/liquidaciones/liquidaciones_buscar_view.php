@@ -702,7 +702,43 @@
 			});
 			$.each(idsliq, function(i, item) {
                 var gastos_lab = $("#gastos_lab_"+item).val();
-                console.log(item +  '  ' + gastos_lab);
+			    if(gastos_lab==0.00){
+                Swal.fire({
+                    title: "Por favor ingrese el motivo de gastos de laboratorio en 0.00",
+                    input: "text",
+                    inputAttributes: {
+                        autocapitalize: "off"
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: "Guardar",
+                    showLoaderOnConfirm: true,
+                    preConfirm: async (login) => {
+                        try {
+                            if (!login) {
+                                return Swal.showValidationMessage("El comentario es obligatorio");
+                            }
+                            return login;
+                        } catch (error) {
+                           Swal.showValidationMessage('Validacion: '+ error);
+                        }
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                	    var motivo = result.value;
+                        $.ajax({
+                            url:  '<?php echo base_url(); ?>Liquidaciones/item_laboratorio_cero',
+                            type: 'POST',
+                            datatype: "json",
+                            data: {
+                            id_liquidacion_cita : item,
+                            motivo : motivo
+                        }, 
+                        success: function(response) {
+                            console.log(response);
+                        }  
+                        });
+                    });
+			    }
 			});
 			if (idsLiquidacion.length > 0) {
 				var idsLiquidacionStr = idsLiquidacion.join(',');
