@@ -3030,5 +3030,23 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
         $this->output->set_output(json_encode($response));
         return;
 	}	
-	
+	public function get_diente()
+	{
+		// ... Comprobamos la sesion del usuario
+		$ok_ticket = $this->Ticket_model->recoger_ticket($this->session->userdata('ticket'));
+		if ($ok_ticket == 0) {
+			header("Location: " . RUTA_WWW);
+			exit;
+		}
+		$id_presupuesto_item=$this->input->post('id_presupuesto_item');
+		$parametros=['id_presupuesto_item' => $id_presupuesto_item];
+        $diente=$this->Presupuestos_model->getDiente($parametros);
+        if(empty($diente)){
+        	$diente='-';
+        }
+        $response = array('success' => true, 'error' => false, 'diente'  => $diente,'id_presupuesto_item'=>$id_presupuesto_item);
+        $this->output->set_content_type('application/json');
+        $this->output->set_output(json_encode($response));
+        return;
+	}		
 }

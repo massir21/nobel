@@ -343,7 +343,6 @@
                 id_liquidacion_cita : id_liquidacion_cita,
             }, 
             success: function(response) {
-            	console.log(response);
                 span.attr('data-bs-toggle','tooltip');
                 span.attr('title','Motivo: '+ response.comentarios); 
             }  

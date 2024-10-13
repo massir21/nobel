@@ -216,10 +216,11 @@
 													</tr>
 												</thead>
 												<tbody class="text-gray-700 fw-semibold">
+													<?php //print_r($value['citas']); ?>
 													<?php foreach ($value['citas'] as $c => $cita) { ?>
-														<tr>
+														<tr class="citas_lab">
 															<td><?= $cita['fecha_cita'] ?></td>
-															<td><?= $cita['nombre_servicio'] ?> <span  class="text-primary"><br>Diente: <?= ($value['dientes'] != '') ? $value['dientes'] : '-' ?></span></td>
+															<td><?= $cita['nombre_servicio'] ?> <span  class="text-primary"><br>Diente: <span class="diente" id="id_presupuesto_item_<?= $cita['id_presupuesto_item'] ?>" data-id="<?= $cita['id_presupuesto_item'] ?>"></span></span></td>
 															<td><?= $cita['usuario'] ?></td>
 															<td><?= $cita['pvp'] ?></td>
 															<td><?= $cita['dto'] ?></td>
@@ -248,6 +249,23 @@
 	</div>
 </div>
 <script>
+    /*$('.citas_lab').each(function (){
+        let span=$(this).find(".diente");
+        let id_presupuesto_item= span.attr("data-id");
+        $.ajax({
+            url:  "<?php echo base_url(); ?>Presupuestos/get_diente",
+            type: 'POST',
+            datatype: "json",
+            data: {
+                id_presupuesto_item : id_presupuesto_item,
+            }, 
+            success: function(response) {
+                let diente=$("#id_presupuesto_item_"+id_presupuesto_item);
+                diente.html(response.diente);
+            }  
+        
+        });
+    });*/
 	$("#tabla_clientes").DataTable({
 		language: {
 			"sProcessing": "Procesando...",
@@ -276,7 +294,28 @@
 		initComplete: function() {
 			$("#tabla_clientes").fadeIn()
 		},
+		drawCallback: function(settings) {
+            $('.citas_lab').each(function (){
+                let span=$(this).find(".diente");
+                let id_presupuesto_item= span.attr("data-id");
+                $.ajax({
+                    url:  "<?php echo base_url(); ?>Presupuestos/get_diente",
+                    type: 'POST',
+                    datatype: "json",
+                    data: {
+                        id_presupuesto_item : id_presupuesto_item,
+                    }, 
+                    success: function(response) {
+                        let diente=$("#id_presupuesto_item_"+id_presupuesto_item);
+                        diente.html(response.diente);
+                    }
+                });
+            });
+		},
 	});
+    
+
+
 	/*
 		var oldExportAction = function(self, e, dt, button, config) {
 			if (button[0].className.indexOf('buttons-excel') >= 0) {

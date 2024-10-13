@@ -1325,4 +1325,16 @@ class Presupuestos_model extends CI_Model
         }
         return $comentarios;     
     }
+    function getDiente($parametros){
+        $diente="";
+        $AqConexion_model = new AqConexion_model();
+        $sentencia_sql="SELECT * FROM presupuestos_items WHERE id_presupuesto_item = @id_presupuesto_item";
+        $datos = $AqConexion_model->select($sentencia_sql, $parametros);
+        if(!empty($datos)){
+            foreach ($datos as $key => $value) {
+                $diente = $value['dientes'];
+            }
+        }
+        return $diente;     
+    }
 }

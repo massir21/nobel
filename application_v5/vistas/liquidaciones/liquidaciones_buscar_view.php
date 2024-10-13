@@ -116,7 +116,7 @@
 									$mes_busqueda = date('Y-m', strtotime($fecha_hasta));
 									$mes_cita = date('Y-m', strtotime($value['fecha_cita']));
 								} ?>
-								<tr class="" data-liquidacion-cita="<?= $value['id_liquidacion_cita'] ?>">
+								<tr class="liquidacion-cita" data-liquidacion-cita="<?= $value['id_liquidacion_cita'] ?>">
 									<td export-data="<?= $value['id_liquidacion_cita'] ?>">
 										<div class="form-check form-check-solid form-switch form-check-custom fv-row mb-2 p-2 ">
 											<input class="form-check-input w-35px h-20px" type="checkbox" id="id_liq_<?= $value['id_liquidacion_cita'] ?>" name="ids_liquidacion[]" value="<?= $value['id_liquidacion_cita'] ?>">
@@ -124,6 +124,7 @@
 										</div>
 									</td>
 									<td class="">
+										<input type="hidden" id="cliente_<?= $value['id_liquidacion_cita'] ?>" value="<?= $value['cliente'] ?>">
 										<?= $value['cliente'] ?>
 									</td>
 									<td class="" <?= ($mes_cita < $mes_busqueda) ? 'style="border: 4px solid #fdd100;border-radius: 1rem;"' : '' ?>>
@@ -385,7 +386,33 @@
 			</div>
 		</div>
 	</div>
+    <div id="motivoLaboratorio_modal" class="modal fade" tabindex="-1" aria-labelledby="motivoLaboratorio_modalModalLabel" aria-hidden="true" data-focus-on="input:first">
+	    <div class="modal-dialog modal-dialog-centered">
+		    <div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="motivoLaboratorio_modalModalLabel">Editar cita</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="row mb-5">
+						<div class="col-12 mb-3">
+                        <table class="tabla-motivos">
+                        <thead><tr><th>Cliente</th><th>Motivo</th></tr></thead>
+                        <tbody>
+                        	
+                        </tbody>
+                        </table>
+						</div>
+					</div>
+				</div>
+				<div id="mensaje"></div>
+				<div class="modal-footer">
+					<button type="button" id="guardar_motivos" class="btn btn-primary">Guardar</button>
+				</div>
+		    </div>
 
+	    </div>
+    </div>
 	<script>
 		var buttonCommon = {
 			exportOptions: {
@@ -695,113 +722,137 @@
 
 		$('[data-calcular-comisiones]').on('click', function() {
 			var idsLiquidacion = [];
-			var idsliq={};
+			var items={};
+			var lab=0;
+			var i=0;
+            var tablaMotivos= $(".tabla-motivos");
 			tablacitas.rows().nodes().to$().find('input[name="ids_liquidacion[]"]:checked').each(function() {
 				idsLiquidacion.push($(this).val());
-				idsliq['id']=$(this).val();
 			});
-			$.each(idsliq, function(i, item) {
-                var gastos_lab = $("#gastos_lab_"+item).val();
+            $('.liquidacion-cita').each(function (){
+            	let idsliq={};
+            	let id_liquidacion_cita=$(this).attr("data-liquidacion-cita");
+            	let checkbox = $("#id_liq_"+id_liquidacion_cita);
+            	let cliente = $("#cliente_"+id_liquidacion_cita).val();
+            	if(checkbox.is(':checked')){
+				    idsliq['id']=id_liquidacion_cita;
+				    idsliq['cliente']=cliente;
+				    items[i]=idsliq;
+				    i++;
+            	}
+            });
+			$.each(items, function(i, item) {
+                let gastos_lab = $("#gastos_lab_"+item.id).val();
+                let cliente = item.cliente;
 			    if(gastos_lab==0.00){
-                Swal.fire({
-                    title: "Por favor ingrese el motivo de gastos de laboratorio en 0.00",
-                    input: "text",
-                    inputAttributes: {
-                        autocapitalize: "off"
-                    },
-                    showCancelButton: true,
-                    confirmButtonText: "Guardar",
-                    showLoaderOnConfirm: true,
-                    preConfirm: async (login) => {
-                        try {
-                            if (!login) {
-                                return Swal.showValidationMessage("El comentario es obligatorio");
-                            }
-                            return login;
-                        } catch (error) {
-                           Swal.showValidationMessage('Validacion: '+ error);
-                        }
-                    },
-                    allowOutsideClick: () => !Swal.isLoading()
-                }).then((result) => {
-                	    var motivo = result.value;
+			    	lab++;
+			    }
+			});
+			if(lab>0){
+				tablaMotivos.find('.row_movivo').remove();
+			    $.each(items, function(i, item) {
+                   tablaMotivos.append('<tr class="row_movivo" data-id="'+item.id+'"><td>'+item.cliente+'</th><th><textarea id="motivo_'+item.id+'"></textarea></th></tr>');
+			    });
+			    var modal = $('#motivoLaboratorio_modal');
+			    modal.modal('show');
+			}
+			$("#guardar_motivos").on("click",function(){
+				var vm=0;
+				$('.row_movivo').each(function (){
+					let id_liquidacion_cita=$(this).attr("data-id");
+					let motivo = $("#motivo_"+id_liquidacion_cita).val();
+                    if(!motivo) vm++;
+				});
+				if(vm>0){
+                    let mensaje ='<div class="alert alert-danger" role="alert">El motivo es obligatorio!!</div>';
+                    $("#mensaje").html(mensaje);
+                    $("#mensaje").show();
+				}
+				else{
+                    $("#mensaje").html("");
+                    $("#mensaje").hide();
+                    $('.row_movivo').each(function (){
+                        let id_liquidacion_cita=$(this).attr("data-id");
+                        let motivo = $("#motivo_"+id_liquidacion_cita).val();
                         $.ajax({
                             url:  '<?php echo base_url(); ?>Liquidaciones/item_laboratorio_cero',
                             type: 'POST',
                             datatype: "json",
                             data: {
-                            id_liquidacion_cita : item,
+                            id_liquidacion_cita : id_liquidacion_cita,
                             motivo : motivo
                         }, 
                         success: function(response) {
-                            console.log(response);
+                            $('#motivoLaboratorio_modal').modal('hide');
                         }  
-                        });
+                        }); 
                     });
-			    }
-			});
-			if (idsLiquidacion.length > 0) {
-				var idsLiquidacionStr = idsLiquidacion.join(',');
-				var idEmpleado = $('#id_empleado').val();
-				$.ajax({
-					url: '<?= base_url() ?>Liquidaciones/comisiones_citas',
-					type: 'POST',
-					data: {
-						ids_liquidaciones_cita: idsLiquidacionStr,
-						id_usuario: idEmpleado
-					},
-					dataType: 'json',
-					success: function(response) {
-						//if (response.comisiones && response.comisiones.length > 0) {
-						var tbody = $('#tabla_comisiones tbody');
-						tbody.empty();
-						var pvpacumulado = parseFloat(0);
-						var totalapagar = parseFloat(0);
-						$.each(response.comisiones, function(index, comision) {
-							var comision_pvpacumulado = parseFloat(comision.valorable);
-							var comision_valoreuros = parseFloat(comision.valoreuros);
-							//if (comision_pvpacumulado > 0) {
-							var simbolo = (comision.tipo == 'tramo' || comision.tipo == 'porcentaje') ? '%' : ((comision.tipo == 'fijo') ? '€/srv' : '€')
+                    if (idsLiquidacion.length > 0) {
+                        var idsLiquidacionStr = idsLiquidacion.join(',');
+                        var idEmpleado = $('#id_empleado').val();
+                        $.ajax({
+                            url: '<?= base_url() ?>Liquidaciones/comisiones_citas',
+                            type: 'POST',
+                            data: {
+                                ids_liquidaciones_cita: idsLiquidacionStr,
+                                id_usuario: idEmpleado
+                            },
+                            dataType: 'json',
+                            success: function(response) {
+                             //if (response.comisiones && response.comisiones.length > 0) {
+                                var tbody = $('#tabla_comisiones tbody');
+                                tbody.empty();
+                                var pvpacumulado = parseFloat(0);
+                                var totalapagar = parseFloat(0);
+                                $.each(response.comisiones, function(index, comision) {
+                                    var comision_pvpacumulado = parseFloat(comision.valorable);
+                                    var comision_valoreuros = parseFloat(comision.valoreuros);
+                                    //if (comision_pvpacumulado > 0) {
+                                    var simbolo = (comision.tipo == 'tramo' || comision.tipo == 'porcentaje') ? '%' : ((comision.tipo == 'fijo') ? '€/srv' : '€')
 
-							var row = '<tr';
-							row += ' class="" data-id_comision="' + comision.id_comision + '"';
-							row += ' data-pvpacumulado="' + comision_pvpacumulado + '"';
-							row += ' data-valoreuros="' + comision_valoreuros + '">';
-							row += '<td class="col_id">' + comision.id_comision + '</td>';
-							row += '<td>' + (comision.id_item > 0 ? comision.nombre_item : (comision.id_familia_item > 0 ? comision.nombre_familia : comision.item)) + '</td>';
-							row += '<td>' + comision.tipo;
-							if (comision.tipo == 'tramo') {
-								row += '<span class="fs-8 text-muted d-block">' + comision.importe_desde + ' -> ' + comision.importe_hasta + '</span>';
-							}
-							row += '</td>';
-							row += '<td>' + comision.comision + simbolo + '</td>';
-							row += '<td>' + comision.num_citas + '</td>';
-							row += '<td class="acumulado">' + comision_pvpacumulado.toFixed(2) + '€</td>';
-							row += '<td>' + comision_valoreuros.toFixed(2) + '€</td>';
-							row += '</tr>';
-							$('#tabla_comisiones tbody').append(row);
-							//console.log(pvpacumulado + ' + ' + comision.pvpacumulado + ' = ')
-							pvpacumulado += comision_pvpacumulado;
-							totalapagar += comision_valoreuros;
+                                    var row = '<tr';
+                                    row += ' class="" data-id_comision="' + comision.id_comision + '"';
+                                    row += ' data-pvpacumulado="' + comision_pvpacumulado + '"';
+                                    row += ' data-valoreuros="' + comision_valoreuros + '">';
+                                    row += '<td class="col_id">' + comision.id_comision + '</td>';
+                                    row += '<td>' + (comision.id_item > 0 ? comision.nombre_item : (comision.id_familia_item > 0 ? comision.nombre_familia : comision.item)) + '</td>';
+                                    row += '<td>' + comision.tipo;
+                                    if (comision.tipo == 'tramo') {
+                                       row += '<span class="fs-8 text-muted d-block">' + comision.importe_desde + ' -> ' + comision.importe_hasta + '</span>';
+                                    }
+                                    row += '</td>';
+                                    row += '<td>' + comision.comision + simbolo + '</td>';
+                                    row += '<td>' + comision.num_citas + '</td>';
+                                    row += '<td class="acumulado">' + comision_pvpacumulado.toFixed(2) + '€</td>';
+                                    row += '<td>' + comision_valoreuros.toFixed(2) + '€</td>';
+                                    row += '</tr>';
+                                    $('#tabla_comisiones tbody').append(row);
+                                    //console.log(pvpacumulado + ' + ' + comision.pvpacumulado + ' = ')
+                                    pvpacumulado += comision_pvpacumulado;
+                                    totalapagar += comision_valoreuros;
 							//}
-						});
-						$('#pvp_acumulado_comisiones').html(parseFloat(pvpacumulado).toFixed(2) + '€')
-						$('#total_pagar_comisiones').html(parseFloat(totalapagar).toFixed(2) + '€')
+                                });
+                                $('#pvp_acumulado_comisiones').html(parseFloat(pvpacumulado).toFixed(2) + '€')
+                                $('#total_pagar_comisiones').html(parseFloat(totalapagar).toFixed(2) + '€')
 						//var tablacomisiones = datatabescomisiones();
-						$('#modal-card_comisiones').modal('show')
-						$('#tabla_comisiones').DataTable().columns.adjust().responsive.recalc();
+                                $('#modal-card_comisiones').modal('show')
+                                $('#tabla_comisiones').DataTable().columns.adjust().responsive.recalc();
 
 						/*} else {
 							Swal.fire('No se encontraron comisiones.');
 						}*/
-					},
-					error: function() {
-						Swal.fire('Error en la solicitud AJAX.');
-					}
-				});
-			} else {
-				Swal.fire('Indica alguna cita para realizar el cálculo de comisiones');
-			}
+					        },
+					        error: function() {
+						       Swal.fire('Error en la solicitud AJAX.');
+					        }
+				        });
+			        } else {
+				        Swal.fire('Indica alguna cita para realizar el cálculo de comisiones');
+			        }
+				}
+
+			});
+
 		});
 
 		function datatabescomisiones() {
