@@ -1127,4 +1127,35 @@ class Liquidaciones extends CI_Controller
         $response = ['success' => true,'id_liquidacion_cita'=>$rtval];
         echo json_encode($response);
     }
+	public function item_laboratorio_cero()
+	{
+		$id_liquidacion_cita = $this->input->post('id_liquidacion_cita');
+		$motivo = $this->input->post('motivo');
+		if (!empty($id_liquidacion_cita)) {
+			$parametros['id_liquidacion_cita'] = $id_liquidacion_cita;
+			$id_liquidacion = $this->Liquidaciones_model->getIdByLiquidacionCita($parametros);
+            $nota=$this->Liquidaciones_model->guardarNota($id_liquidacion,$id_liquidacion_cita,$motivo);
+            $response = array('success' => true, 'error' => false);
+            $this->output->set_content_type('application/json');
+            $this->output->set_output(json_encode($response));
+            return;
+		} else {
+            $response = array('success' => false, 'error' => false);
+            $this->output->set_content_type('application/json');
+            $this->output->set_output(json_encode($response));
+            return;
+		}
+	}
+    public function cargar_comentario(){
+    	$id_liquidacion_cita=$this->input->post('id_liquidacion_cita');
+        $parametros=['id_liquidacion_cita' => $this->input->post('id_liquidacion_cita')];
+        $comentarios=$this->Liquidaciones_model->cargarComentario($parametros);
+        if(empty($comentarios)){
+        	$comentarios='Sin comentarios';
+        }
+        $response = array('success' => true, 'error' => false, 'comentarios'  => $comentarios,'id_liquidacion_cita'=>$id_liquidacion_cita);
+        $this->output->set_content_type('application/json');
+        $this->output->set_output(json_encode($response));
+        return;
+    }
 }
