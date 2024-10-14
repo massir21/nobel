@@ -213,6 +213,15 @@
         .page_number:after {
             content: counter(page);
         }
+        
+        #aseguradora {
+            font-size:14px;
+            padding-top:1em;
+        }
+        
+        #aseguradora strong {
+           color: #626262;
+        }
     </style>
 </head>
 <?php
@@ -320,6 +329,15 @@ function mostrar_dientes($desde, $hasta, $sentido, $alignTabla, $orientac, $dien
                 </td>
             </tr>
         </table>
+        <?php if ( $registro[0]['nombre_aseguradora'] ){ ?>
+        <table class="headerSection">
+            <tr>
+                <td>
+                    <p id="aseguradora"><strong>ASEGURADORA:</strong> <?= $registro[0]['nombre_aseguradora'] ?></p>
+                </td>
+            </tr>
+        </table> 
+        <?php } ?>
     </header>
 
     <div style="padding-top: .5cm; margin-bottom: -0.5cm;">

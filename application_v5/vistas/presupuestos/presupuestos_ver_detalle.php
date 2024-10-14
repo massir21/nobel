@@ -38,6 +38,11 @@
 		<li class="nav-item">
 			<a class="nav-link" data-bs-toggle="tab" href="#tab_docs">Documentos</a>
 		</li>
+		<?php if (!empty($documentos_seguro)){ ?>
+		<li class="nav-item">
+			<a class="nav-link" data-bs-toggle="tab" href="#tab_docs_seguros">Documentos seguro</a>
+		</li>
+		<?php } ?>
 	<?php } ?>
 
 </ul>
@@ -506,6 +511,16 @@
 				</table>
 			</div>
 		</div>
+		
+		<?php if (!empty($documentos_seguro)){ ?>
+		<div class="tab-pane fade" id="tab_docs_seguros" role="tabpanel">
+			<a href="<?php echo base_url($documentos_seguro[0]['file_tarjeta']); ?>" download class="btn btn-warning mb-3">Tarjeta paciente</a>
+			<a href="<?php echo base_url($documentos_seguro[0]['file_presupuesto']); ?>" download class="btn btn-warning mb-3">Presupuesto aseguradora</a>
+
+		</div>
+		<?php } ?>
+		
+		
 	<?php } ?>
 </div>
 

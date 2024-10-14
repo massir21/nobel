@@ -137,6 +137,7 @@
                     <tr class="text-start text-gray-600 fw-bold fs-5 text-uppercase gs-0">
                         <th class="col_mod">F. Mod.</th>
                         <th class="col_tit">Titulo.</th>
+                        <th class="col_seg">Seguro</th>
                         <th class="col_id">#Num. Pres.</th>
                         <th>Cliente</th>
                         <th class="col_fecha">Creación - Validez</th>
@@ -301,6 +302,16 @@
                 className: "text-nowrap",
                 render: function(data, type, row) {
                     return row.titulo_presupuesto;
+                }
+            },
+            {
+                //0
+                titlee: "",
+                name: "seguro",
+                data: "nombre_aseguradora",
+                className: "text-nowrap",
+                render: function(data, type, row) {
+                    return row.nombre_aseguradora;
                 }
             },
             {

@@ -111,7 +111,7 @@ class Aseguradoras_model extends CI_Model
             }
             
             if ( move_uploaded_file($_FILES['aseguradora_tarjeta_paciente']['tmp_name'], $directorioDestino . $final_name) ){
-                $data['file_tarjeta'] = $directorioDestino.$final_name;
+                $data['file_tarjeta'] = '/recursos/seguros/' . $id_aseguradora . '/'.$final_name;
             }
         }
         
@@ -132,12 +132,22 @@ class Aseguradoras_model extends CI_Model
             }
             
             if ( move_uploaded_file($_FILES['aseguradora_presupuesto']['tmp_name'], $directorioDestino . $final_name) ){
-                $data['file_presupuesto'] = $directorioDestino.$final_name;
+                $data['file_presupuesto'] = '/recursos/seguros/' . $id_aseguradora . '/'.$final_name;
             }
         }
         
         $AqConexion_model = new AqConexion_model();
         $AqConexion_model->insert('seguros_archivos', $data);
+    }
+    
+    function documentos_seguro($param){
+        
+        $AqConexion_model = new AqConexion_model();
+        
+        $parametros['id_presupuesto']= $param['id_presupuesto'];
+        $sentencia_sql="SELECT * FROM seguros_archivos WHERE id_presupuesto = @id_presupuesto";
+        
+        return $AqConexion_model->select($sentencia_sql, $parametros);
     }
     
 }

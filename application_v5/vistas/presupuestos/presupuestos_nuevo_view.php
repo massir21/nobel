@@ -634,12 +634,7 @@
     ?>
     
     function tiene_seguro(){
-        var condicion1 = jQuery('#mostrar_aseguradoras').is(":checked");
-        var condicion2 = jQuery('#id_aseguradora').val();
-        var condicion3 = jQuery('#aseguradora_tarjeta_paciente_file').val();
-        var condicion4 = jQuery('#aseguradora_presupuesto_file').val();
-        
-        return ( condicion1 && condicion2 && condicion3 && condicion4 );
+        return jQuery('#mostrar_aseguradoras').is(":checked");
     }
     
     function quitar_limite_descuentos(){
@@ -678,9 +673,17 @@
         $('#mostrar_aseguradoras, #id_aseguradora, #aseguradora_tarjeta_paciente_file, #aseguradora_presupuesto_file').on('change', function(){
             if ( tiene_seguro() ){
                 quitar_limite_descuentos();
+                
+                jQuery('#id_aseguradora').attr('required', 'required');
+                jQuery('#aseguradora_tarjeta_paciente_file').attr('required', 'required');
+                jQuery('#aseguradora_presupuesto_file').attr('required', 'required');
             }
             else {
                 restaurar_limite_descuentos();
+                
+                jQuery('#id_aseguradora').removeAttr('required');
+                jQuery('#aseguradora_tarjeta_paciente_file').removeAttr('required');
+                jQuery('#aseguradora_presupuesto_file').removeAttr('required');
             }
         });
         

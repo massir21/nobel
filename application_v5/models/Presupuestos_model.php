@@ -96,12 +96,14 @@ class Presupuestos_model extends CI_Model
         presupuestos.pago_estado_manual,
         (SELECT COALESCE(SUM(importe_euros), 0) FROM dietario WHERE id_presupuesto = presupuestos.id_presupuesto AND borrado = 0 AND estado = 'Pagado') AS total_pagado,
         (SELECT COALESCE(SUM(pi.coste), 0) AS total_pvp FROM presupuestos_items pi JOIN citas c ON pi.id_cita = c.id_cita WHERE pi.id_presupuesto = presupuestos.id_presupuesto AND c.estado = 'Finalizado' AND pi.borrado = 0 AND c.borrado = 0) AS total_gastado,
-        (SELECT SUM(comi_fin) AS tcomifin FROM presupuestos_items pi2 WHERE pi2.id_presupuesto = presupuestos.id_presupuesto) AS totalcomisionfinanciacion
+        (SELECT SUM(comi_fin) AS tcomifin FROM presupuestos_items pi2 WHERE pi2.id_presupuesto = presupuestos.id_presupuesto) AS totalcomisionfinanciacion,
+        aseguradoras.nombre as nombre_aseguradora
         FROM presupuestos
             LEFT JOIN usuarios usu on usu.id_usuario = presupuestos.id_usuario
             LEFT JOIN usuarios usu_modi on usu_modi.id_usuario = presupuestos.id_usuario_modificacion
             LEFT JOIN clientes on clientes.id_cliente = presupuestos.id_cliente
             LEFT JOIN centros on centros.id_centro = presupuestos.id_centro
+            LEFT JOIN aseguradoras on aseguradoras.id_aseguradora = presupuestos.id_aseguradora
         WHERE presupuestos.borrado = 0 
         " . $busqueda . " ORDER BY presupuestos.id_presupuesto DESC ";
         $datos = $AqConexion_model->select($sentencia_sql, $parametros);
@@ -319,6 +321,7 @@ class Presupuestos_model extends CI_Model
         $registro['fecha_modificacion'] = date("Y-m-d H:i:s");
         $registro['borrado'] = 0;
         $registro['titulo_presupuesto'] = $parametros['titulo'];
+        $registro['id_aseguradora'] = $parametros['id_aseguradora'];
 
 
         // CHAINS

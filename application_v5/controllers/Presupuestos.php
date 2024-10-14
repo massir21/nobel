@@ -273,6 +273,7 @@ class Presupuestos extends CI_Controller
 		if (count($idsClientes)) {
 			$sqlExtra = 'SELECT ' .
 				'presupuestos.fecha_modificacion, ' .
+				'aseguradoras.nombre as nombre_aseguradora, ' .
 				'presupuestos.nro_presupuesto, ' .
 				'(CONCAT(clientes.nombre, " ", clientes.apellidos)) AS cliente, ' .
 				'presupuestos.fecha_creacion, ' .
@@ -296,6 +297,7 @@ class Presupuestos extends CI_Controller
 				'FROM presupuestos ' .
 				'LEFT JOIN clientes ON presupuestos.id_cliente = clientes.id_cliente ' .
 				'LEFT JOIN usuarios ON presupuestos.id_usuario = usuarios.id_usuario ' .
+				'LEFT JOIN aseguradoras ON aseguradoras.id_aseguradora = presupuestos.id_aseguradora ' .
 				'LEFT JOIN (SELECT id_presupuesto, COALESCE(COUNT(*), 0) AS items_sinfinalizar ' .
 				'FROM `presupuestos_items` pi ' .
 				'LEFT JOIN citas ci ON pi.id_cita = ci.id_cita ' .
@@ -329,100 +331,6 @@ class Presupuestos extends CI_Controller
 		$res = json_encode($result);
 		echo $res;
 		die();
-
-
-		/*
-        $campos = [
-            'presupuestos.fecha_modificacion',
-            'presupuestos.nro_presupuesto',
-            '(CONCAT(clientes.nombre, " ", clientes.apellidos)) AS cliente',
-            'presupuestos.fecha_creacion',
-            'presupuestos.totalpresupuesto',
-            'presupuestos.total_aceptado',
-            '(presupuestos.total_pendiente * -1 ) AS pendiente',
-            '(CASE WHEN dto_100 > 0 THEN presupuestos.dto_100
-				ELSE ((presupuestos.total_sin_descuento - presupuestos.totalpresupuesto) / presupuestos.total_sin_descuento) * 100
-				END ) AS descuento',
-            'presupuestos.estado',
-            '(DATE_FORMAT(presupuestos.fecha_modificacion,"%d-%m-%Y %H:%i") ) AS f_modificacion',
-            'presupuestos.*',
-            '(DATE_FORMAT(presupuestos.fecha_creacion,"%d-%m-%Y %H:%i") ) AS f_creacion',
-            '(DATE_FORMAT(DATE(presupuestos.fecha_validez),"%d-%m-%Y") ) AS f_validez',
-            '(CONCAT(usuarios.nombre, " ", usuarios.apellidos)) AS empleado',
-            'presupuestos.fecha_validez',
-            'presupuestos.es_repeticion',
-            'presupuestos.id_presupuesto',
-            'COALESCE(temporl.items_sinfinalizar, 0) AS items_sinfinalizar',
-        ];
-        $tabla = 'presupuestos';
-        $join = [
-            'clientes' => 'presupuestos.id_cliente = clientes.id_cliente',
-            'usuarios' => 'presupuestos.id_usuario = usuarios.id_usuario',
-            "(SELECT id_presupuesto,COALESCE(COUNT(*), 0) AS items_sinfinalizar
-FROM `presupuestos_items` pi
-LEFT JOIN citas ci ON pi.id_cita=ci.id_cita
-WHERE aceptado=1 AND (pi.id_cita=0 OR (ci.estado!='Programada' AND ci.estado!='Finalizado')) AND pi.borrado=0
-GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos.id_presupuesto',
-        ];
-        $add_rule = [];
-        $where = ['presupuestos.borrado' => 0];
-
-        /*if ($this->session->userdata('id_perfil') > 0) {
-            $where['presupuestos.id_centro'] = $this->session->userdata('id_centro_usuario');
-        }
-
-        if ($this->input->get('id_cliente') != '') {
-            $where['presupuestos.id_cliente'] = $this->input->get('id_cliente');
-        }
-        if ($this->input->get('id_usuario') != '') {
-            $where['presupuestos.id_usuario'] = $this->input->get('id_usuario');
-        }
-        if ($this->input->get('estado') != '') {
-            $where['presupuestos.estado'] = $this->input->get('estado');
-            if($where['presupuestos.estado']=='Aceptado pendiente' || $where['presupuestos.estado']=='Finalizado'){
-                $where['presupuestos.estado']=array('Aceptado parcial','Aceptado');
-            }
-            if($this->input->get('estado')=='Finalizado'){
-                $add_rule['having']='items_sinfinalizar = 0';
-            }
-            else
-                if($this->input->get('estado')=='Aceptado pendiente'){
-                    $add_rule['having']='items_sinfinalizar > 0';
-                }
-        }
-        if ($this->input->get('revisado') != '') {
-            $where['presupuestos.revisado'] = $this->input->get('revisado');
-        }
-        if ($this->input->get('fecha_desde') != '') {
-            $where['presupuestos.fecha_creacion >='] = $this->input->get('fecha_desde') . " 00:00:00";
-        }
-        if ($this->input->get('fecha_hasta') != '') {
-            $where['presupuestos.fecha_creacion <='] = $this->input->get('fecha_hasta') . " 23:59:59";
-        }
-        if ($this->input->get('fecha_validez') != '') {
-            $where['presupuestos.fecha_validez >='] = $this->input->get('fecha_validez');
-        }
-
-        if($this->input->get('rechazados') != ''){
-            if(!$this->input->get('rechazados')){
-                $where['presupuestos.estado !='] = 'Rechazado';
-            }
-        }
-
-
-
-        if (($table != "") && ($columna != "") && ($valor != "")) {
-            $where[$table . '.' . $columna] = $valor;
-            $result = json_decode($this->datatable->get_datatable($this->input->get(), $tabla, $campos, $join, $where, $add_rule));
-        } else {
-
-            $result = json_decode($this->datatable->get_datatable($this->input->get(), $tabla, $campos, $join, $where, $add_rule));
-
-        }
-        //$result->query = $this->db->last_query();
-        $res = json_encode($result);
-        echo $res;
-		*/
 	}
 
 	public function get_presupuestos($table = null, $columna = null, $valor = null)
@@ -1488,6 +1396,8 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 		unset($param);
 		$param['id_presupuesto'] = $id_presupuesto;
 		$data['documentos'] = $this->Clientes_model->documentos_cliente($param);
+		$data['documentos_seguro'] = $this->Aseguradoras_model->documentos_seguro($param);
+			
 		echo $this->load->view('presupuestos/presupuestos_ver_detalle', $data, true);
 	}
 	function ver_pdf($id_presupuesto)
@@ -1517,8 +1427,6 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 		unset($param);
 		$param['id_presupuesto'] = $id_presupuesto;
 		$param['tipo_item'] = 'Servicio';
-		$param['aceptado'] = 1;
-		//$param['aceptado'] = 1;
 		/* CHAINS 20240218 - Se añade el parámetro para decidir la dirección de ordenado */
 		$servicios_items = $this->Presupuestos_model->leer_presupuestos_items($param, 'ASC');
 		// manejamos aqui los elementos como lo haciamos en el pdf
