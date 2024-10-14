@@ -156,7 +156,6 @@ class Informes extends CI_Controller
     }
     //Fin del provisional
 
-
     public function diario($fecha = null, $id_centro = null, $rand = null, $ver = '')
     {
         if ($rand == "5c8e15faec49a66870b949314ac062d0" && $id_centro > 0 && $fecha != "") {
@@ -165,70 +164,6 @@ class Informes extends CI_Controller
             $data['centro'] = $this->Usuarios_model->leer_centros($param);
             $data['fecha_dia'] = date("d-m-Y", strtotime($fecha));
             $this->load->model('Presupuestos_model');
-
-            //17/02/21 recarga carnet mismo cliente. mismo monto mismo día
-            /*unset($parametros);
-            $parametros['fecha_inicio'] = $fecha;
-            $parametros['fecha_fin'] = $fecha;
-            $parametros['id_centro'] = $id_centro;
-            unset($cliente_mas_ecarga);
-            $data['recarga_carnet'] = 0;
-            $data['recargas_carnets'] = $this->Carnets_model->leer_carnets_recarga($parametros);
-
-            $i = 1;
-            $c = 0;
-            if(is_array($data['recargas_carnets'])){
-                foreach ($data['recargas_carnets'] as $row) {
-                    if ($i == 1) {
-                        $xid_cliente = $row['id_cliente'];
-                        $xmonto = $row['monto'];
-                    }
-
-                    if ($xid_cliente == $row['id_cliente'] and $i > 1) {
-                        //Si es el mismo monto para el mismo cliente debe mostrarlo
-                        if ($xmonto == $row['monto']) {
-                            $cliente_mas_ecarga[$c] = array(
-                                "fecha_hora" => $row['fecha_creacion_ddmmaaaa'] . " " . $row['hora'],
-                                "id_carnet" => $row['id_carnet'],
-                                "cliente" => $row['cliente'],
-                                "monto" => $row['monto']
-                            );
-                            $c++;
-                        }
-                    }
-                    $xid_cliente = $row['id_cliente'];
-                    $xmonto = $row['monto'];
-                    $i++;
-                } //Foreach
-            }
-
-            if (isset($cliente_mas_ecarga)) {
-                if ($cliente_mas_ecarga != 0) {
-                    $data['recarga_carnet'] = $cliente_mas_ecarga;
-                }
-            }
-
-
-            //Fin de recarga carnet mismo cliente. mismo monto mismo día
-
-            //
-            // Carnet de Servicios que no coincide el pago con el precio
-            // total de todos los servicios.
-            //
-            unset($parametros);
-            $parametros['carnet_especial_distinto_precio'] = 1;
-            $parametros['fecha_inicio'] = $fecha;
-            $parametros['fecha_fin'] = $fecha;
-            $parametros['id_centro'] = $id_centro;
-
-            $data['carnets_especiales'] = $this->Dietario_model->leer($parametros);
-
-            if (is_array($data['carnets_especiales'])) {
-                for ($i = 0; $i < count($data['carnets_especiales']); $i++) {
-                    $data['carnets_especiales'][$i]['precio_servicios'] = $this->Informes_model->precio_servicios($data['carnets_especiales'][$i]['id_carnet']);
-                }
-            }
-            */
 
             //FACTURACION DIARIA
             $data['id_centro'] = $id_centro;
@@ -488,7 +423,14 @@ class Informes extends CI_Controller
             }
             $data['nro_pres_aceptados'] = $nro_pres_aceptados;
             $data['valor_pres_aceptados'] = $valor_pres_aceptados;
-
+            
+            $data['presupuestos_aseguradoras'] = array();
+            foreach ( $presupuestos_aceptados as $i => $presupuesto ){
+                if ( $presupuesto['id_aseguradora'] ){
+                    $presupuesto['documentos_seguro'] = $this->Aseguradoras_model->documentos_seguro( array('id_presupuesto' => $presupuesto['id_presupuesto']) );
+                    $data['presupuestos_aseguradoras'][] = $presupuesto;
+                }
+            }
 
             // 
             // Producción en base a las citas

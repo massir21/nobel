@@ -1224,4 +1224,38 @@ class Liquidaciones_model extends CI_Model
         $datos = $AqConexion_model->select($sentencia_sql, $parametros);
         return $datos;
     }
+    function guardarNota($id_liquidacion,$id_liquidacion_cita,$motivo){
+        $AqConexion_model = new AqConexion_model();
+        // ... Datos generales.
+        $registro['id_liquidacion'] = $id_liquidacion;
+        $registro['id_liquidacion_cita'] = $id_liquidacion_cita;
+        $registro['comentarios'] =  $motivo;
+        $registro['estado'] =  'archivado';
+        $AqConexion_model->insert('liquidaciones_notas', $registro);
+        return $this->db->insert_id();
+    }
+    function cargarComentario($parametros){
+        $comentarios="";
+        $AqConexion_model = new AqConexion_model();
+        $sentencia_sql="SELECT * FROM liquidaciones_notas WHERE id_liquidacion_cita = @id_liquidacion_cita";
+        $datos = $AqConexion_model->select($sentencia_sql, $parametros);
+        if(!empty($datos)){
+            foreach ($datos as $key => $value) {
+                $comentarios = $value['comentarios'];
+            }
+        }
+        return $comentarios;     
+    }
+    function getIdByLiquidacionCita($parametros){
+        $id_liquidacion="";
+        $AqConexion_model = new AqConexion_model();
+        $sentencia_sql="SELECT * FROM liquidaciones_citas WHERE id_liquidacion_cita = @id_liquidacion_cita";
+        $datos = $AqConexion_model->select($sentencia_sql, $parametros);
+        if(!empty($datos)){
+            foreach ($datos as $key => $value) {
+                $id_liquidacion = $value['id_liquidacion'];
+            }
+        }
+        return $id_liquidacion;     
+    }    
 }

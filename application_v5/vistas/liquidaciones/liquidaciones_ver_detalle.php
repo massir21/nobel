@@ -113,15 +113,6 @@
 											}
 											break;
 										}
-											if ($value['gastos_lab'] > 0) {
-												$alertbg = '';
-												$show = '';
-											}
-											else
-											{
-                                                 $alertbg='border: 6px solid red;';
-                                                 $show='id="gastosL_'.$value['id_presupuesto_item'].'" class="gastosLab_rojo" data-id="'.$value['id_presupuesto_item'].'"';
-											}
 									} 
      								?>
 							<td style="<?= $alertbg ?> "><span <?= $show ?>><?= $value['gastos_lab'] ?></span></td>
@@ -343,13 +334,13 @@
     }).container().appendTo($('#buttons_tags'));
     $('.gastosLab_rojo').each(function(){
     	var span=$(this);
-        var id_presupuesto_item = span.attr("data-id");
+        var id_liquidacion_cita = span.attr("data-id");
         $.ajax({
-            url:  '<?php echo base_url(); ?>Presupuestos/presupuesto_cargar_comentario',
+            url:  '<?php echo base_url(); ?>Liquidaciones/cargar_comentario',
             type: 'POST',
             datatype: "json",
             data: {
-                id_presupuesto_item : id_presupuesto_item,
+                id_liquidacion_cita : id_liquidacion_cita,
             }, 
             success: function(response) {
                 span.attr('data-bs-toggle','tooltip');

@@ -786,6 +786,47 @@
         </table>
         <hr>
 
+        <p class="titulo-seccion">
+            Presupuestos con aseguradoras
+        </p>
+        <table style="width: 100%;">
+            <thead class="cabecera-tabla">
+                <tr>
+                    <th>Número presupuesto</th>
+                    <th>Cliente</th>
+                    <th>Aseguradora</th>
+                    <th>Tarjeta paciente</th>
+                    <th>Presupuesto aseguradora</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700 fw-semibold">
+                <?php foreach ( $presupuestos_aseguradoras as $presupuesto_aseguradoras ){ ?>
+                <tr class="fondo-fila">
+                    <td style="text-align: center; font-size: 11px;">
+                        <?php echo $presupuesto_aseguradoras['nro_presupuesto']; ?>
+                    </td>
+                    <td style="text-align: center;">
+                        <?php echo $presupuesto_aseguradoras['cliente']; ?>
+                    </td>
+                    <td style="text-align: center; font-size: 11px;">
+                        <?php echo $presupuesto_aseguradoras['nombre_aseguradora']; ?>
+                    </td>
+                    <td style="text-align: center;">
+                        <?php if (isset($presupuesto_aseguradoras['documentos_seguro'][0]['file_tarjeta'])) { ?>
+                        <a href="<?php echo base_url($presupuesto_aseguradoras['documentos_seguro'][0]['file_tarjeta']); ?>" download>Descargar</a>
+                        <?php } ?>
+                    </td>
+                    <td style="text-align: center;">
+                        <?php if (isset($presupuesto_aseguradoras['documentos_seguro'][0]['file_presupuesto'])) { ?>
+                        <a href="<?php echo base_url($presupuesto_aseguradoras['documentos_seguro'][0]['file_presupuesto']); ?>" download>Descargar</a>
+                        <?php } ?>    
+                    </td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+        <hr>
+        
         <!-- ------------------------------------------------------------------------------ -->
         <!-- --- PRODUCCION ------------------------------------------------------------- -->
         <!-- ------------------------------------------------------------------------------ -->
