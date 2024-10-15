@@ -158,18 +158,26 @@
 									$palabras_clave = array('implante', 'corona', 'sobredentadura', 'protesis', 'hueso', 'membrana', 'chincheta', 'ferula', 'entrada', 'laboratorio');
 									$valor_servicio = $value['servicio'];
 									$alertbg = '';
+									$show='';
 									foreach ($palabras_clave as $palabra) {
 										if (str_contains($valor_servicio, $palabra)) {
 											if ($value['gastos_lab'] == 0) {
 												$alertbg = 'border: 6px solid red;';
+                                                $show=' gastosLab_rojo ';
+
 											}
 											break;
 										}
-									} ?>
+									} 
+									if (str_contains($valor_servicio, 'osteointegrado')) {
+										$alertbg = '';
+										$show = '';
+									}
+									?>
 
 									<td export-data="<?= $value['gastos_lab'] ?>" data-sort="<?= $value['gastos_lab'] ?>" style="width: 80px;">
 
-										<input type="number" class="form-control form-control-sm w-80px" step=".01" id="gastos_lab_<?= $value['id_liquidacion_cita'] ?>" name="gastos_lab" value="<?= $value['gastos_lab'] ?>" data-ini="<?= $value['gastos_lab'] ?>" data-id-presupuesto-item="<?= $value['id_presupuesto_item'] ?>" style="<?= $alertbg ?> ">
+										<input type="number" class="form-control form-control-sm w-80px <?= $show ?>" step=".01" id="gastos_lab_<?= $value['id_liquidacion_cita'] ?>" name="gastos_lab" value="<?= $value['gastos_lab'] ?>" data-ini="<?= $value['gastos_lab'] ?>" data-id-presupuesto-item="<?= $value['id_presupuesto_item'] ?>" style="<?= $alertbg ?> ">
 									</td>
 									<td class="totalrow w-120px" export-data="<?= $value['total'] ?>">
 										<?= euros($value['total']) ?>
@@ -744,17 +752,85 @@
 			$.each(items, function(i, item) {
                 let gastos_lab = $("#gastos_lab_"+item.id).val();
                 let cliente = item.cliente;
-			    if(gastos_lab==0.00){
+			    if((gastos_lab==0.00)&&($( "#gastos_lab_"+item.id).hasClass( "gastosLab_rojo" ))){
 			    	lab++;
 			    }
 			});
 			if(lab>0){
 				tablaMotivos.find('.row_movivo').remove();
 			    $.each(items, function(i, item) {
-                   tablaMotivos.append('<tr class="row_movivo" data-id="'+item.id+'"><td>'+item.cliente+'</th><th><textarea id="motivo_'+item.id+'"></textarea></th></tr>');
+                    let gastos_lab = $("#gastos_lab_"+item.id).val();
+                    let cliente = item.cliente;
+			    	if((gastos_lab==0.00)&&($( "#gastos_lab_"+item.id).hasClass( "gastosLab_rojo" ))){
+                        tablaMotivos.append('<tr class="row_movivo" data-id="'+item.id+'"><td>'+item.cliente+'</th><th><textarea id="motivo_'+item.id+'"></textarea></th></tr>');
+                    }
 			    });
 			    var modal = $('#motivoLaboratorio_modal');
 			    modal.modal('show');
+			}
+			else{
+                    if (idsLiquidacion.length > 0) {
+                        var idsLiquidacionStr = idsLiquidacion.join(',');
+                        var idEmpleado = $('#id_empleado').val();
+                        $.ajax({
+                            url: '<?= base_url() ?>Liquidaciones/comisiones_citas',
+                            type: 'POST',
+                            data: {
+                                ids_liquidaciones_cita: idsLiquidacionStr,
+                                id_usuario: idEmpleado
+                            },
+                            dataType: 'json',
+                            success: function(response) {
+                             //if (response.comisiones && response.comisiones.length > 0) {
+                                var tbody = $('#tabla_comisiones tbody');
+                                tbody.empty();
+                                var pvpacumulado = parseFloat(0);
+                                var totalapagar = parseFloat(0);
+                                $.each(response.comisiones, function(index, comision) {
+                                    var comision_pvpacumulado = parseFloat(comision.valorable);
+                                    var comision_valoreuros = parseFloat(comision.valoreuros);
+                                    //if (comision_pvpacumulado > 0) {
+                                    var simbolo = (comision.tipo == 'tramo' || comision.tipo == 'porcentaje') ? '%' : ((comision.tipo == 'fijo') ? '€/srv' : '€')
+
+                                    var row = '<tr';
+                                    row += ' class="" data-id_comision="' + comision.id_comision + '"';
+                                    row += ' data-pvpacumulado="' + comision_pvpacumulado + '"';
+                                    row += ' data-valoreuros="' + comision_valoreuros + '">';
+                                    row += '<td class="col_id">' + comision.id_comision + '</td>';
+                                    row += '<td>' + (comision.id_item > 0 ? comision.nombre_item : (comision.id_familia_item > 0 ? comision.nombre_familia : comision.item)) + '</td>';
+                                    row += '<td>' + comision.tipo;
+                                    if (comision.tipo == 'tramo') {
+                                       row += '<span class="fs-8 text-muted d-block">' + comision.importe_desde + ' -> ' + comision.importe_hasta + '</span>';
+                                    }
+                                    row += '</td>';
+                                    row += '<td>' + comision.comision + simbolo + '</td>';
+                                    row += '<td>' + comision.num_citas + '</td>';
+                                    row += '<td class="acumulado">' + comision_pvpacumulado.toFixed(2) + '€</td>';
+                                    row += '<td>' + comision_valoreuros.toFixed(2) + '€</td>';
+                                    row += '</tr>';
+                                    $('#tabla_comisiones tbody').append(row);
+                                    //console.log(pvpacumulado + ' + ' + comision.pvpacumulado + ' = ')
+                                    pvpacumulado += comision_pvpacumulado;
+                                    totalapagar += comision_valoreuros;
+							//}
+                                });
+                                $('#pvp_acumulado_comisiones').html(parseFloat(pvpacumulado).toFixed(2) + '€')
+                                $('#total_pagar_comisiones').html(parseFloat(totalapagar).toFixed(2) + '€')
+						//var tablacomisiones = datatabescomisiones();
+                                $('#modal-card_comisiones').modal('show')
+                                $('#tabla_comisiones').DataTable().columns.adjust().responsive.recalc();
+
+						/*} else {
+							Swal.fire('No se encontraron comisiones.');
+						}*/
+					        },
+					        error: function() {
+						       Swal.fire('Error en la solicitud AJAX.');
+					        }
+				        });
+			        } else {
+				        Swal.fire('Indica alguna cita para realizar el cálculo de comisiones');
+			        }				
 			}
 			$("#guardar_motivos").on("click",function(){
 				var vm=0;

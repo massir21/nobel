@@ -100,6 +100,7 @@
 									$palabras_clave = array('implante', 'corona', 'sobredentadura', 'protesis', 'hueso', 'membrana', 'chincheta', 'ferula', 'entrada', 'laboratorio');
 									$valor_servicio = $value['servicio'];
 									$alertbg = '';
+									$show = '';
 									foreach ($palabras_clave as $palabra) {
 										if (str_contains($valor_servicio, $palabra)) {
 											if ($value['gastos_lab'] > 0) {
@@ -112,6 +113,10 @@
                                                  $show='id="gastosL_'.$value['id_liquidacion_cita'].'" class="gastosLab_rojo" data-id="'.$value['id_liquidacion_cita'].'"';
 											}
 											break;
+										}
+										if (str_contains($valor_servicio, 'osteointegrado')) {
+											$alertbg = '';
+											$show = '';
 										}
 									} 
      								?>
