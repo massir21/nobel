@@ -785,7 +785,8 @@
             </tbody>
         </table>
         <hr>
-
+        
+        <?php if (!empty($presupuestos_aseguradoras)){ ?>
         <p class="titulo-seccion">
             Presupuestos con aseguradoras
         </p>
@@ -826,6 +827,7 @@
             </tbody>
         </table>
         <hr>
+        <?php } ?>
         
         <!-- ------------------------------------------------------------------------------ -->
         <!-- --- PRODUCCION ------------------------------------------------------------- -->

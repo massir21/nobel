@@ -633,6 +633,8 @@ GROUP BY id_presupuesto  ) AS temporl" => 'temporl.id_presupuesto = presupuestos
 		$parametros = $_POST;
 		$parametros['dto_euros'] = 0;
 		$parametros['dto_100'] = 0;
+		$parametros['id_aseguradora'] = !empty($parametros['id_aseguradora']) ? $parametros['id_aseguradora'] : 0;
+		
 		$id_presupuesto = $this->Presupuestos_model->nuevo_presupuesto($parametros);
 		foreach ($items as $key => $item) {
 			// aqui es donde calcula el precio real de cada servicio
