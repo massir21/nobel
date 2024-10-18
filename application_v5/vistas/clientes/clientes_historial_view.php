@@ -221,13 +221,12 @@ $tiposDocumentosPopup=$tiposDocumentos;
                         <thead class="">
                             <tr class="text-start text-gray-600 fw-bold fs-5 text-uppercase gs-0">
                                 <th style="display: none;">ID</th>
-                                <th>Fecha - Hora</th>
-                                <th>Centro</th>
-                                <th>Concepto</th>
-                                <th>Emp.</th>
-                                <th>Euros</th>
-                               <?php /* <th>Templos</th> */ ?>
-                                <th>Estado</th>
+                                <th class="text-center">Fecha - Hora</th>
+                                <th class="text-center">Centro</th>
+                                <th class="text-center">Concepto</th>
+                                <th class="text-center">Emp.</th>
+                                <th class="text-end">Euros</th>
+                                <th class="text-center">Estado</th>
                             </tr>
                         </thead>
                         <tbody class="text-gray-700 fw-semibold">
@@ -334,41 +333,47 @@ $tiposDocumentosPopup=$tiposDocumentos;
                                                 <?php echo $row['empleado']; ?>
                                             </td>
                                             <td class="text-end">
+                                                
                                                 <?php if ($row['notas_pago_descuento'] != "") { ?>
-                                                    <span style="cursor: pointer; cursor: hand;" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-inverse" title="<?php echo $row['notas_pago_descuento']; ?>">
-                                                    <?php } ?>
-                                                    <?php if ($row['tipo_pago'] != "#templos") { ?>
-                                                        <?php echo number_format($row['importe_total_final'], 2, ',', '.') . "€"; ?>
-                                                        <?php if ($row['descuento_euros'] > 0) {
-                                                            echo "<br><span class='badge badge-primary' style='font-size: 11px; color: #fff;'>Dto. " . round($row['descuento_euros'], 2) . " €</span>";
-                                                        } ?>
-                                                        <?php if ($row['descuento_porcentaje'] > 0) {
-                                                            echo "<br><span class='lbadge badge-primary' style='font-size: 11px; color: #fff;'>Dto. " . round($row['descuento_porcentaje'], 2) . "%</span>";
-                                                        } ?>
-                                                        <?php $total_importe += $row['importe_total_final']; ?>
-                                                    <?php } else { ?>
-                                                        <?php echo "0,00€"; ?>
-                                                    <?php } ?>
-                                                    <?php if ($row['tipo_pago_saldo'] == "#liquidacion") {
-                                                        echo "<br><span class='badge badge-primary' style='font-size: 11px; '>Saldo. " . round($row['importe_saldo'], 2) . " €</span>";
-                                                    } ?>
-                                                    <?php if ($row['notas_pago_descuento'] != "") { ?>
-                                                    </span>
-                                                    <?php } ?>
-                                            </td>
-                                            <?php /* <td class="text-end">
-                                                <?php if ($row['templos'] > 0 && $row['tipo_pago'] == "#templos") { ?>
-                                                    <?php echo $row['templos'];
-                                                    $total_templos += $row['templos'];
-                                                    if ($row['foto_templo'] != null && $row['foto_templo'] != '') { ?>
-                                                        <br>
-                                                        <a href="<?php echo base_url() . 'recursos/foto/' . $row['foto_templo']; ?>" data-lightbox="smile"> <img height="42" width="42" src="<?php echo base_url() . 'recursos/foto/' . $row['foto_templo']; ?>"></a>
-                                                    <?php } ?>
-                                                    <?php $total_templos += $row['templos']; ?>
-                                                <?php } else { ?>
-                                                    -
+                                                <span style="cursor: pointer; cursor: hand;" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-inverse" title="<?php echo $row['notas_pago_descuento']; ?>">
                                                 <?php } ?>
-                                                */ ?>
+                                                
+                                                <?php 
+                                                if ($row['tipo_pago'] != "#templos") {
+                                                    
+                                                    $importe = 0;
+                                                    if ( $row['importe_total_final'] > 0 ) {
+                                                        $importe = $row['importe_total_final'];
+                                                    }
+                                                    /*else
+                                                    if ( $row['importe_euros'] > 0 ){ 
+                                                        $importe = $row['importe_euros'];
+                                                    }*/
+                                                   
+                                                    echo number_format($importe, 2, ',', '.') . "€";
+                                                    
+                                                    if ($row['descuento_euros'] > 0) {
+                                                        echo "<br><span class='badge badge-primary' style='font-size: 11px; color: #fff;'>Dto. " . round($row['descuento_euros'], 2) . " €</span>";
+                                                    }
+                                                    
+                                                    if ($row['descuento_porcentaje'] > 0) {
+                                                        echo "<br><span class='lbadge badge-primary' style='font-size: 11px; color: #fff;'>Dto. " . round($row['descuento_porcentaje'], 2) . "%</span>";
+                                                    } 
+                                                    
+                                                    $total_importe += $row['importe_euros']; 
+                                                } 
+                                                else { 
+                                                    echo "0,00€";
+                                                } 
+                                                
+                                                if ($row['tipo_pago_saldo'] == "#liquidacion") {
+                                                    echo "<br><span class='badge badge-primary' style='font-size: 11px; '>Saldo. " . round($row['importe_saldo'], 2) . " €</span>";
+                                                } 
+                                                
+                                                if ($row['notas_pago_descuento'] != "") { ?>
+                                                </span>
+                                                <?php } ?>
+                                                
                                             </td>
                                             <td style="text-align: center;">
                                                 <?php if ($row['estado'] == "Pagado" || $row['estado'] == "Devuelto") { ?>
@@ -425,7 +430,7 @@ $tiposDocumentosPopup=$tiposDocumentos;
                                                     <?php }
                                                         }
                                                     } ?>
-                                                    <?php if ($row['estado'] == "Pagado" && $row['id_pedido'] == 0) { ?>
+                                                    <?php if ($row['estado'] == "Pagado" && $row['id_pedido'] == 0 && $row['devuelto'] == 0 ) { ?>
                                                         <?php if ($row['id_carnet'] > 0 && $row['recarga'] == 0) { ?>
                                                             <a href="#" class="btn btn-sm btn-icon btn-warning" onclick="javascript:DevolucionCarnet('<?php echo $row['id_dietario'] ?>');"><i class="fas fa-trash"></i></a>
                                                         <?php } else { ?>

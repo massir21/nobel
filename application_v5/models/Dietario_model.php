@@ -1142,6 +1142,8 @@ class Dietario_model extends CI_Model
         $registro['id_usuario_creador'] = $this->session->userdata('id_usuario');
         $registro['fecha_modificacion'] = date("Y-m-d H:i:s");
         $registro['id_usuario_modificacion'] = $this->session->userdata('id_usuario');
+        $registro['id_dietario_devolucion'] = $parametros['id_dietario'];
+
         $registro['borrado'] = 0;
         if ($parametros['que_devolver'] == 3) {
             $registro['pago_a_cuenta'] = 1;
@@ -1153,16 +1155,23 @@ class Dietario_model extends CI_Model
 
         $sentenciaSQL = "select max(id_dietario) as id from dietario";
         $resultado = $AqConexion_model->select($sentenciaSQL, null);
-
-
-
+        
+        
         // Actualiza el id_dietario que se devuelve, si llegó
         if(isset($parametros['id_dietario']) && $parametros['id_dietario'] > 0){
+            
+            //Para no perder la información de los dientes cuando se desligue el item
+            $dientes = $this->getDientesForDietario([$parametros['id_dietario']]);
+            if (!empty($dientes)){
+              $AqConexion_model->no_select("UPDATE dietario SET dientes = '".implode(',', $dientes)."' 
+                WHERE id_dietario = ".$parametros['id_dietario']." OR id_dietario = ".$resultado[0]['id'], []);
+            }
+            
             $parametros_id_dietario['id_usuario_modificacion'] = $this->session->userdata('id_usuario');
             $parametros_id_dietario['fecha_modificacion'] = date("Y-m-d H:i:s");
 
             // ... Leemos los registros
-            $sentencia_sql = " UPDATE dietario SET devuelto = 1,
+            $sentencia_sql = "UPDATE dietario SET devuelto = 1,
             id_usuario_modificacion = @id_usuario_modificacion,
             fecha_modificacion = @fecha_modificacion
             where id_dietario = ".$parametros['id_dietario']."";
@@ -2230,14 +2239,27 @@ class Dietario_model extends CI_Model
 
 
     function getDientesForDietario($ids){
-      $sql="SELECT id_dietario,dientes FROM presupuestos_items WHERE id_dietario IN (".implode(",",array_keys($ids)).")";
+        
         $AqConexion_model = new AqConexion_model();
+        
+        $sql="SELECT id_dietario,dientes FROM presupuestos_items WHERE id_dietario IN (".implode(",",array_keys($ids)).")";
         $datos = $AqConexion_model->select($sql, null);
         if(is_array($datos)) {
             foreach ($datos as $dato) {
                 $ids[$dato['id_dietario']] = $dato['dientes'];
             }
         }
+        
+        $sql="SELECT id_dietario,dientes FROM dietario WHERE id_dietario IN (".implode(",",array_keys($ids)).")";
+        $datos = $AqConexion_model->select($sql, null);
+        if(is_array($datos)) {
+            foreach ($datos as $dato) {
+                if ( empty($ids[$dato['id_dietario']]) ){
+                  $ids[$dato['id_dietario']] = $dato['dientes'];
+                }
+            }
+        }
+        
         return $ids;
     }
 
