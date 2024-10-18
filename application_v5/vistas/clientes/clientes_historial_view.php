@@ -161,6 +161,13 @@ $tiposDocumentosPopup=$tiposDocumentos;
                     <?= ($existe_firma) ? '<a class="" href="' . base_url() . 'clientes/ver_firma_lopd/' . $registros[0]['id_cliente'] . '" target="_blank">Ver PDF de la firma</a>' : '<a class="" href="' . base_url() . 'clientes/proteccion_de_datos/' . $registros[0]['id_cliente'] . '" class="btn btn-info text-inverse-info">Firmar Protección de Datos</a>' ?>
                 </div>
             </div>
+            <div class="p-3 border">
+                <div class="fw-bold">Saldo Actual</div>
+                <div class="text-gray-600">
+                    <h3 class="fw-bold fs-2x text-grey-700 border-bottom pb-3 d-flex justify-content-between">
+                    <span class="fs-3"><?php echo number_format($saldo, 2, ',', '.') . "€"; ?></span>
+                </div>
+            </div>
         </div>
 
 
@@ -2670,6 +2677,7 @@ $tiposDocumentosPopup=$tiposDocumentos;
                                 <th class="col_presu">Total</th>
                                 <th class="col_aceptado">Aceptado</th>
                                 <th class="col_aceptado">Pendiente</th>
+                                <th>Pago Pendiente</th>
                                 <th class="col_desc">%</th>
                                 <th></th>
                                 <th></th>
@@ -3254,6 +3262,15 @@ $tiposDocumentosPopup=$tiposDocumentos;
                 }
             },
             {
+                //6
+                name: "id_cliente",
+                data: "id_cliente",
+                render: function(data, type, row) {
+                    var html='<span id="pago_pendiente_'+row.id_presupuesto+'" class="pago_pendiente" data-id="'+row.id_presupuesto+'"></span>'; /*row.pendiente;*/
+                    return html;
+                }
+            },
+            {
                 //7
                 name: "descuento",
                 data: "descuento",
@@ -3424,7 +3441,12 @@ $tiposDocumentosPopup=$tiposDocumentos;
         },
         headerCallback: function(thead, data, start, end, display) {},
         createdRow: function(row, data, dataIndex) {},
-        drawCallback: function(settings) {},
+        drawCallback: function(settings) {
+            $(".pago_pendiente").each(function(){
+                let id_presupuesto=$(this).attr("data-id");
+                getPagosPendiente(id_presupuesto)
+            })
+        },
         initComplete: function() {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
@@ -3556,7 +3578,19 @@ $tiposDocumentosPopup=$tiposDocumentos;
         $('#id_presupuesto').val(data.id_presupuesto);
         $('#modal-pago').modal('show');
     })
-
+    function getPagosPendiente(id){
+        $.ajax({
+            url:  '<?= base_url() ?>Dietario/getPagosPendientes',
+            type: 'POST',
+            datatype: "json",
+            data: {
+                id_presupuesto : id
+            }, 
+            success: function(response) {
+                $("#pago_pendiente_"+response.data.id_presupuesto).html(response.data.saldo_pendiente);
+            }  
+        }); 
+    }
     function ImporteMarcado(total) {
 
         efectivo = parseFloat(document.form_pagoeuros.pagado_efectivo.value);

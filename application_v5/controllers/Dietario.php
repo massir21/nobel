@@ -3659,6 +3659,20 @@ $sy = imagesy($estampa);
         $this->output->set_output(json_encode($response));
         return;
     }
+    function getPagosPendientes(){
+        $this->load->model('Dietario_model');
+        $this->load->model('Clientes_model'); 
+        $id_presupuesto=$this->input->post('id_presupuesto');
+        $data['id_presupuesto'] = $id_presupuesto;
+        $pendiente=$this->Dietario_model->getTotalPagosPendiente($data);
+        if($pendiente==null){
+            $pendiente=0;
+        }
+        $response = array('success' => true, 'error' => false,'data' => ['id_presupuesto' => $id_presupuesto, 'saldo_pendiente' =>$pendiente]);
+        $this->output->set_content_type('application/json');
+        $this->output->set_output(json_encode($response));
+        return;        
+    }
 }
 /*UPDATE dietario d
 JOIN presupuestos_items pi ON d.id_dietario = pi.id_dietario

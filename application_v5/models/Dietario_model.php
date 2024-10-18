@@ -2275,4 +2275,16 @@ class Dietario_model extends CI_Model
         $str = $this->db->insert_id();
         return $str;
     }
+    function getTotalPagosPendiente($data){
+        $pendiente="";
+        $AqConexion_model = new AqConexion_model();
+        $sql="SELECT sum(importe_euros) as importe FROM dietario WHERE (estado='Pendiente' OR estado='No Pagado') AND id_presupuesto=@id_presupuesto;";
+        $datos=$AqConexion_model->select($sql, $data);
+        if(!empty($datos)){
+            foreach ($datos as $key => $value) {
+                $pendiente= $value['importe'];
+            }
+        }
+        return $pendiente;
+    }
 }
