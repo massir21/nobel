@@ -137,7 +137,7 @@
                     <tr class="text-start text-gray-600 fw-bold fs-5 text-uppercase gs-0">
                         <th class="col_mod">F. Mod.</th>
                         <th class="col_tit">Titulo.</th>
-                        <th class="col_seg">Seguro</th>
+                        <th class="col_seg text-center">Seguro</th>
                         <th class="col_id">#Num. Pres.</th>
                         <th>Cliente</th>
                         <th class="col_fecha">Creación - Validez</th>
@@ -295,7 +295,7 @@
              }
             },
             {
-                //0
+                //1
                 titlee: "",
                 name: "titulo",
                 data: "titulo_presupuesto",
@@ -305,7 +305,7 @@
                 }
             },
             {
-                //0
+                //2
                 titlee: "",
                 name: "seguro",
                 data: "nombre_aseguradora",
@@ -315,7 +315,7 @@
                 }
             },
             {
-                //1
+                //3
                 titlee: "",
                 name: "nro_presupuesto",
                 data: "nro_presupuesto",
@@ -366,7 +366,7 @@
                 }
             },
             {
-                //2
+                //4
                 titlee: "",
                 name: "cliente",
                 data: "cliente",
@@ -378,7 +378,7 @@
                 }
             },
             {
-                // 3
+                //5
                 titlee: "",
                 name: "fecha_creacion",
                 data: "fecha_creacion",
@@ -389,7 +389,7 @@
                 }
             },
             {
-                // 4
+                //6
                 name: "totalpresupuesto",
                 data: "totalpresupuesto",
                 render: function(data, type, row) {
@@ -398,7 +398,7 @@
                 }
             },
             {
-                // 5
+                //7
                 name: "total_aceptado",
                 data: "total_aceptado",
                 render: function(data, type, row) {
@@ -410,7 +410,7 @@
                 }
             },
             {
-                //6
+                //8
                 name: "pendeinte",
                 data: "pendeinte",
                 render: function(data, type, row) {
@@ -422,7 +422,7 @@
                 }
             },
             {
-                //7
+                //9
                 name: "descuento",
                 data: "descuento",
                 render: function(data, type, row) {
@@ -435,20 +435,8 @@
                     return html
                 }
             },
-            /*
             {
-                //4
-                titlee: "Empleado",
-                name: "empleado_nombre",
-                data: "empleado_nombre",
-				render: function(data, type, row) {
-                    var html = row.e_nombre +' '+row.e_apellidos;
-                    return html
-                }
-            },
-	         */
-            {
-                // 8
+                //10
                 titlee: "",
                 name: "",
                 data: "",
@@ -466,22 +454,10 @@
 
                         html += `<button type="button" class="btn btn-sm btn-icon btn-warning" data-duplicar data-bs-toggle="tooltip" title="Duplicar presupuesto"><i class="fas fa-clone"></i></button>`;
 
-                        /*html += `<button type="button" class="btn btn-sm btn-icon btn-warning" data-clonar data-bs-toggle="tooltip" title="Duplicar presupuesto"><i class="fas fa-clone"></i></button>`;*/
-
                         if (row.estado == 'Pendiente' && row.id_centro == <?=$this->session->userdata('id_centro_usuario')?>) {
                             html += `<button type="button" class="btn btn-sm btn-icon btn-primary" data-estado data-bs-toggle="tooltip" title="Gestionar estado"><i class="fas fa-exclamation-triangle"></i></button>`;
                         }
-                        
-                        <?php /*if ($this->session->userdata('id_perfil') == 0 || $this->session->userdata('id_perfil') == 3) { ?>
-                            if (row.estado == 'Pendiente') {
-                                html += `<button type="button" class="btn btn-sm btn-icon btn-primary" data-estado data-bs-toggle="tooltip" title="Gestionar estado"><i class="fas fa-exclamation-triangle"></i></button>`;
-                            }
-                        <?php } ?>
-                        <?php if ($this->session->userdata('id_perfil') == 2) { ?>
-                            if (row.estado == 'Pendiente' && row.totalpresupuesto <= 600) {
-                                html += `<button type="button" class="btn btn-sm btn-icon btn-primary" data-estado data-bs-toggle="tooltip" title="Gestionar estado"><i class="fas fa-exclamation-triangle"></i></button>`;
-                            }
-                        <?php } */?>
+                       
                         html += `<button type="button" class="btn btn-sm btn-icon btn-info" data-pdf data-bs-toggle="tooltip" title="Ver presupuesto"><i class="fas fa-file-pdf"></i></button>`;
                     }
                     html += `</div>`;
@@ -489,7 +465,7 @@
                 }
             },
             {
-                //9
+                //11
                 titlee: "",
                 name: "",
                 data: "",
@@ -511,7 +487,7 @@
             },
         ],
         columnDefs: [{
-                targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10],
+                targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
                 visible: true,
             },
             {
@@ -523,7 +499,7 @@
                 orderable: false,
             },
             {
-                targets: ['col_id', 'col_validez'],
+                targets: ['col_id', 'col_validez', 'col_seg'],
                 className: 'text-center'
             },
             {
@@ -542,12 +518,10 @@
                 var fecha_validez = $('[name="fecha_validez"]').val();
                 var id_usuario = $('[name="id_usuario"]').val();
                 var estado = $('[name="filter_estado"]').val();
-                // var revisado = $('[name="filter_revisado"]').val();
 
                 var rechazados=jQuery('[name="incluir_rechazados"]').is(':checked');
                 if(rechazados) data.rechazados = 1;
                 else data.rechazados = 0;
-
 
                 if (id_cliente != "") {
                     data.id_cliente = id_cliente;
@@ -567,9 +541,7 @@
                 if (estado != "") {
                     data.estado = estado;
                 }
-                /*if (revisado != "") {
-                    data.revisado = revisado;
-                }*/
+
             },
         },
         language: {
