@@ -3385,4 +3385,17 @@ class Clientes_model extends CI_Model
         $str = $this->db->insert_id();
         return $str;
     }
+    function getTotalPagado($id_cliente){
+        $pagado="";
+        $parametro['id_cliente']=$id_cliente;
+        $AqConexion_model = new AqConexion_model();
+        $sql="SELECT sum(importe) as importe FROM clientes_saldos WHERE (tipo_pago='#efectivo' OR tipo_pago='#financiado' OR tipo_pago='#paypal' OR tipo_pago='#tarjeta' OR tipo_pago='#tpv2' OR tipo_pago='#transferencia') AND id_cliente=@id_cliente;";
+        $datos=$AqConexion_model->select($sql, $parametro);
+        if(!empty($datos)){
+            foreach ($datos as $key => $value) {
+                $pagado= $value['importe'];
+            }
+        }
+        return $pagado;        
+    }
 }

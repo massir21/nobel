@@ -3668,7 +3668,7 @@ $sy = imagesy($estampa);
         if($pendiente==null){
             $pendiente=0;
         }
-        $response = array('success' => true, 'error' => false,'data' => ['id_presupuesto' => $id_presupuesto, 'saldo_pendiente' =>$pendiente]);
+        $response = array('success' => true, 'error' => false,'data' => ['id_presupuesto' => $id_presupuesto, 'saldo_pendiente' =>number_format($pendiente, 2, ',', '.')]);
         $this->output->set_content_type('application/json');
         $this->output->set_output(json_encode($response));
         return;        

@@ -164,8 +164,13 @@ $tiposDocumentosPopup=$tiposDocumentos;
             <div class="p-3 border">
                 <div class="fw-bold">Saldo Actual</div>
                 <div class="text-gray-600">
-                    <h3 class="fw-bold fs-2x text-grey-700 border-bottom pb-3 d-flex justify-content-between">
-                    <span class="fs-3"><?php echo number_format($saldo, 2, ',', '.') . "€"; ?></span>
+                    <span class="text-gray-600"><?php echo number_format($saldo, 2, ',', '.') . "€"; ?></span>
+                </div>
+            </div>
+            <div class="p-3 border">
+                <div class="fw-bold">Total Pagado</div>
+                <div class="text-gray-600">
+                    <span class="text-gray-600"><?php echo number_format($total_pagado, 2, ',', '.') . "€"; ?></span>
                 </div>
             </div>
         </div>
@@ -2677,7 +2682,6 @@ $tiposDocumentosPopup=$tiposDocumentos;
                                 <th class="col_presu">Total</th>
                                 <th class="col_aceptado">Aceptado</th>
                                 <th class="col_aceptado">Pendiente</th>
-                                <th>Pago Pendiente</th>
                                 <th class="col_desc">%</th>
                                 <th></th>
                                 <th></th>
@@ -2685,6 +2689,7 @@ $tiposDocumentosPopup=$tiposDocumentos;
                         </thead>
                         <tbody class="text-gray-700 fw-semibold"></tbody>
                     </table>
+                    <p class="text-danger">(*) Total de pagos pendientes</p>
                 </div>
             </div>
 
@@ -3258,16 +3263,8 @@ $tiposDocumentosPopup=$tiposDocumentos;
                     if(row.total_pendiente_calculado != null && row.total_pendiente_calculado > 0 ){
                         html+=' ('+row.total_pendiente_calculado+') ';
                     }
-                    return html;
-                }
-            },
-            {
-                //6
-                name: "id_cliente",
-                data: "id_cliente",
-                render: function(data, type, row) {
-                    var html='<span id="pago_pendiente_'+row.id_presupuesto+'" class="pago_pendiente" data-id="'+row.id_presupuesto+'"></span>'; /*row.pendiente;*/
-                    return html;
+                    var output=html+'<br><p class="text-danger">(<span id="pago_pendiente_'+row.id_presupuesto+'" class="pago_pendiente" data-id="'+row.id_presupuesto+'"></span>) *</p>';
+                    return output;
                 }
             },
             {

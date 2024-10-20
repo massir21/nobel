@@ -441,7 +441,7 @@ class Clientes extends CI_Controller
         $data['registros'] = $this->Clientes_model->leer_clientes($parametros);
         $data['salud'] = $this->Clientes_model->leer_fichas_salud($parametros);
         $data['existe_firma'] = $this->Clientes_model->existe_firma_lopd($id_cliente);
-
+        $data['total_pagado'] = $this->Clientes_model->getTotalPagado($id_cliente);
         unset($param);
         $param['id_cliente'] = $id_cliente;
         $param['debug'] = 1;
