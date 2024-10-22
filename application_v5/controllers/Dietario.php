@@ -1267,201 +1267,29 @@ $sy = imagesy($estampa);
         unset($param);
         $param['tipo_templos'] = "SI";
         if ($accion == "realizar") {
+            
             unset($parametros);
-            $parametros = $_POST;
-
             unset($param);
-            $tipoDevolucion=isset($parametros["que_devolver"]) ? $parametros["que_devolver"] : 0;
-            switch($tipoDevolucion){
-                case 1: $tipoDevolucion='devolucion_producto'; break;
-                case 2: $tipoDevolucion='devolucion_servicio'; break;
-                case 3: $tipoDevolucion='devolucion_acuenta'; break;
-                default: $tipoDevolucion='none'; break;
-            }
-
-
-
-
-            // RCG Validaciones previas
-            $doDietario=true;
-            $errorDevolucion='';
-            $saldo=$this->Clientes_model->saldo( $parametros['id_cliente']);
-            if($tipoDevolucion=='devolucion_acuenta'){
-                if($saldo<=0){
-                    $doDietario=false;
-                    $errorDevolucion='No se puede hacer la devolución, ya que el cliente no tiene saldo.';
-                    $accion='error';
-                }
-                else
-                    if($saldo<$parametros['importe_devolver']){
-                        $parametros['importe_devolver']=$saldo;
-                        $accion='warning';
-                        $doDietario=false;
-                        $errorDevolucion='La devolución máxima posible es de '.$saldo;
-                    }
-            }
-
-           // $id_dietario=0;
-            if($doDietario) {
-                $param['id_cliente'] = $parametros['id_cliente'];
-                $param['id_cita'] = 0;
-                $param['fecha_hora_concepto'] = date("Y-m-d H:i:s");
-                $param['id_empleado'] = (isset($parametros['id_empleado'])) ? $parametros['id_empleado'] : $this->session->userdata('id_usuario');
-                $param['id_producto'] = 0;
-                $param['id_servicio'] = 0;
-                if (isset($parametros['id_producto'])) {
-                    $partes = explode("|", $parametros['id_producto']);
-                    $param['id_producto'] = $partes[0];
-                }
-                if (isset($parametros['id_servicio'])) {
-                    unset($partes);
-                    $partes = explode("|", $parametros['id_servicio']);
-                    $param['id_servicio'] = $partes[0];
-                }
-                $param['id_carnet'] = 0;
-                $param['recarga'] = 0;
-                $param['importe_euros'] = 0;
-                if (isset($parametros['importe_devolver'])) {
-                    $param['importe_euros'] = ($parametros['importe_devolver'] * -1);
-                }
-                $param['pagado_efectivo'] = 0;
-                $param['pagado_tarjeta'] = 0;
-                $param['pagado_transferencia'] = 0; //24/03/20
-                $param['pagado_tpv2'] = 0; //31/08/21
-                $param['pagado_habitacion'] = 0;
-                if ($parametros['forma_pago'] == "#efectivo") {
-                    $param['pagado_efectivo'] = $param['importe_euros'];
-                }
-                if ($parametros['forma_pago'] == "#tarjeta") {
-                    $param['pagado_tarjeta'] = $param['importe_euros'];
-                }
-                //24/03/20
-                if ($parametros['forma_pago'] == "#transferencia") {
-                    $param['pagado_transferencia'] = $param['importe_euros'];
-                }
-                //Fin
-
-                //31/08/21
-                if ($parametros['forma_pago'] == "#tpv2") {
-                    $param['pagado_tpv2'] = $param['importe_euros'];
-                }
-                //Fin
-                if ($parametros['forma_pago'] == "#habitacion") {
-                    $param['pagado_habitacion'] = $param['importe_euros'];
-                }
-                $param['tipo_pago'] = $parametros['forma_pago'];
-                $param['templos'] = 0;
-                if ($parametros['forma_pago'] == "#templos") {
-                    $param['id_carnet'] = $parametros['id_carnet'];
-                    $param['templos'] = $parametros['templos'];
-                }
-
-                if ($parametros['forma_pago'] == "#especial") {
-                    if (isset($parametros['id_carnet_especial'])) {
-                        if ($parametros['id_carnet_especial'] > 0) {
-                            $param['id_carnet'] = $parametros['id_carnet_especial'];
-                            $param['templos'] = 0;
-                        }
-                    }
-                }
-                if (isset($parametros['id_dietario'])) {
-                    $param['id_dietario'] = $parametros['id_dietario'];
-                }
-
-                $param['estado'] = "Devuelto";
-                $param['motivo_devolucion'] = $parametros['motivo_devolucion'];
-                $param['que_devolver'] = $parametros['que_devolver'];
-
-
-                if($param['que_devolver']==2){
-                    // RCG Si se esta devolviendo un servicio se busca el ultimo servicio del cliente para ponerlo devuelto en el dietario
-                    $lastDietario=$this->Dietario_model->leer([
-                        'id_cliente'=>$param['id_cliente'],
-                        'id_servicio'=>$param['id_servicio'],
-                        'estado'=>'Pagado',
-                        'devuelto'=>0
-                    ]);
-                    if($lastDietario>0){
-                        $param['id_dietario']=$lastDietario[0]['id_dietario'];
-                    }
-                }
-                else
-                if($param['que_devolver']==1){
-                    $lastDietario=$this->Dietario_model->leer([
-                        'id_cliente'=>$param['id_cliente'],
-                        'id_producto'=>$param['id_producto'],
-                        'estado'=>'Pagado',
-                        'devuelto'=>0
-                    ]);
-                    if($lastDietario>0){
-                        $param['id_dietario']=$lastDietario[0]['id_dietario'];
-                    }
-                }
-
-
-//echo "<pre>";var_dump($param);echo "</pre>"; echo "<hr/>";
-
-                // ... Guardamos la devolucion en el diaetario
+            
+            $parametros = $this->input->post();
+            $errorDevolucion=$this->_devolucionErrores($parametros); ;
+            
+            if( empty($errorDevolucion) ) {
+                
+                $param = $this->_prepararDevolucion($parametros);
                 $id_dietario = $this->Dietario_model->devolucion($param);
-
-
-                // ... Si es una devolución a un carnet, le sumamos los templos
-                // y lo guardamos en el historico de cambios.
-                if (isset($parametros['id_carnet'])) {
-                    if ($parametros['id_carnet'] > 0) {
-                        unset($param4);
-                        $param4['id_carnet'] = $parametros['id_carnet'];
-                        $carnet_elegido = $this->Carnets_model->leer($param4);
-
-                        unset($param3);
-                        $param3['id_carnet'] = $parametros['id_carnet'];
-                        $param3['id_dietario'] = $id_dietario;
-                        $param3['id_servicio'] = $param['id_servicio'];
-                        $param3['id_cliente'] = $param['id_cliente'];
-                        $param3['id_empleado'] = $this->session->userdata('id_usuario');
-                        $param3['templos'] = $param['templos'] * -1;
-                        $ok = $this->Carnets_model->anadir_historial($param3);
-
-                        // ... Modificamos los templos disponibles en el carnet.
-                        unset($param5);
-                        $param5['id_carnet'] = $parametros['id_carnet'];
-                        $param5['templos_disponibles'] = ($carnet_elegido[0]['templos_disponibles'] + $param['templos']);
-                        $param5['ajuste_automatico'] = 1;
-                        $id = $this->Carnets_model->ajustes_templos($param5);
-                    }
-                }
-
-                // ... Devolucion a carnet espeacial
-                // Lo que se hace es crear otro servicio en el carnet.
-                if (isset($parametros['id_carnet_especial'])) {
-                    if ($parametros['id_carnet_especial'] > 0) {
-                        unset($servicio_carnet);
-
-                        $servicio_carnet['id_carnet'] = $parametros['id_carnet_especial'];
-                        $servicio_carnet['id_servicio'] = $param['id_servicio'];
-
-                        unset($param_serv);
-                        $param_serv['id_servicio'] = $param['id_servicio'];
-                        $servicio = $this->Servicios_model->leer_servicios($param_serv);
-
-                        $servicio_carnet['id_cliente'] = $param['id_cliente'];
-                        $servicio_carnet['pvp'] = $servicio[0]['pvp'];
-
-                        $id = $this->Carnets_model->anadir_servicio($servicio_carnet);
-                    }
-                }
-
-                // ... Crear ticket de la devolucion
+                
+                $this->_gestionarDevolucionCarnetYTemplos($parametros);
+                
                 $array[0] = $id_dietario;
                 $id_ticket = $this->Dietario_model->CrearTicket($array, $parametros['id_cliente']);
             }
             else{
-                // No se hace la devolucion.
+                // No se hace la devolución.
                 $accion='error';
                 unset($param5);
                 $param5['id_cliente'] = $parametros['id_cliente'];
                 $data['cliente_elegido'] = $this->Clientes_model->leer_clientes($param5);
-
             }
             // Fin Realizar
         }
@@ -1517,6 +1345,42 @@ $sy = imagesy($estampa);
         }
     }
 
+    public function devolucion_conjunta($accion, $ids)
+    {
+        // ... Comprobamos la sesion del cliente
+        $ok_ticket = $this->Ticket_model->recoger_ticket($this->session->userdata('ticket'));
+        if ($ok_ticket == 0) {
+            header("Location: " . RUTA_WWW);
+            exit;
+        }
+     
+        if ( $accion == 'listar'){
+            
+            $ids_dietarios = explode(':', $ids);
+            
+            $lineas_devolucion = array();
+            foreach ($ids_dietarios as $id_dietario){
+               $lineas_devolucion[] = $this->Dietario_model->leer(['id_dietario' => $id_dietario]);   
+            }
+            
+            $data['lineas_devolucion'] = $lineas_devolucion;
+        }
+
+        // ... Modulos del cliente
+        $param_modulos['id_perfil'] = $this->session->userdata('id_perfil');
+        $data['modulos'] = $this->Usuarios_model->leer_modulos($param_modulos);
+        $data['accion'] = $accion;
+ 
+        // ... Pagina master
+        $permiso = $this->Acceso_model->TienePermiso($data['modulos'], 14);
+        if ($permiso) {
+            $this->load->view('dietario/dietario_devoluciones_conjunta_view', $data);
+        } else {
+            header("Location: " . RUTA_WWW . "/errores/error_404.html");
+            exit;
+        }
+    }
+        
     // ----------------------------------------------------------------------------- //
     // ... Resumen
     // ----------------------------------------------------------------------------- //
@@ -3673,9 +3537,179 @@ $sy = imagesy($estampa);
         $this->output->set_output(json_encode($response));
         return;        
     }
+    
+    private function _devolucionErrores($parametros){
+        
+        $errorDevolucion = '';
+        $tipoDevolucion = isset($parametros["que_devolver"]) ? $parametros["que_devolver"] : 0;
+        
+        switch($tipoDevolucion){
+            case 1: $tipoDevolucion='devolucion_producto'; break;
+            case 2: $tipoDevolucion='devolucion_servicio'; break;
+            case 3: $tipoDevolucion='devolucion_acuenta'; break;
+            default: $tipoDevolucion='none'; break;
+        }
+        
+        $saldo=$this->Clientes_model->saldo( $parametros['id_cliente']);
+        if($tipoDevolucion=='devolucion_acuenta'){
+            if($saldo<=0){
+                $errorDevolucion='No se puede hacer la devolución, ya que el cliente no tiene saldo.';
+            }
+            else
+            if($saldo<$parametros['importe_devolver']){
+                $parametros['importe_devolver']=$saldo;
+                $errorDevolucion='La devolución máxima posible es de '.$saldo;
+            }
+        }
+        
+        return $errorDevolucion;
+    }
+    
+    private function _prepararDevolucion($parametros){
+    
+        $param = array();
+        
+        $param['id_cliente'] = $parametros['id_cliente'];
+        $param['id_cita'] = 0;
+        $param['fecha_hora_concepto'] = date("Y-m-d H:i:s");
+        $param['id_empleado'] = (isset($parametros['id_empleado'])) ? $parametros['id_empleado'] : $this->session->userdata('id_usuario');
+        $param['id_producto'] = 0;
+        $param['id_servicio'] = 0;
+        if (isset($parametros['id_producto'])) {
+            $partes = explode("|", $parametros['id_producto']);
+            $param['id_producto'] = $partes[0];
+        }
+        if (isset($parametros['id_servicio'])) {
+            unset($partes);
+            $partes = explode("|", $parametros['id_servicio']);
+            $param['id_servicio'] = $partes[0];
+        }
+        $param['id_carnet'] = 0;
+        $param['recarga'] = 0;
+        $param['importe_euros'] = 0;
+        if (isset($parametros['importe_devolver'])) {
+            $param['importe_euros'] = ($parametros['importe_devolver'] * -1);
+        }
+        $param['pagado_efectivo'] = 0;
+        $param['pagado_tarjeta'] = 0;
+        $param['pagado_transferencia'] = 0; //24/03/20
+        $param['pagado_tpv2'] = 0; //31/08/21
+        $param['pagado_habitacion'] = 0;
+        if ($parametros['forma_pago'] == "#efectivo") {
+            $param['pagado_efectivo'] = $param['importe_euros'];
+        }
+        if ($parametros['forma_pago'] == "#tarjeta") {
+            $param['pagado_tarjeta'] = $param['importe_euros'];
+        }
+        //24/03/20
+        if ($parametros['forma_pago'] == "#transferencia") {
+            $param['pagado_transferencia'] = $param['importe_euros'];
+        }
+        //Fin
+    
+        //31/08/21
+        if ($parametros['forma_pago'] == "#tpv2") {
+            $param['pagado_tpv2'] = $param['importe_euros'];
+        }
+        //Fin
+        if ($parametros['forma_pago'] == "#habitacion") {
+            $param['pagado_habitacion'] = $param['importe_euros'];
+        }
+        $param['tipo_pago'] = $parametros['forma_pago'];
+        $param['templos'] = 0;
+        if ($parametros['forma_pago'] == "#templos") {
+            $param['id_carnet'] = $parametros['id_carnet'];
+            $param['templos'] = $parametros['templos'];
+        }
+    
+        if ($parametros['forma_pago'] == "#especial") {
+            if (isset($parametros['id_carnet_especial'])) {
+                if ($parametros['id_carnet_especial'] > 0) {
+                    $param['id_carnet'] = $parametros['id_carnet_especial'];
+                    $param['templos'] = 0;
+                }
+            }
+        }
+        if (isset($parametros['id_dietario'])) {
+            $param['id_dietario'] = $parametros['id_dietario'];
+        }
+    
+        $param['estado'] = "Devuelto";
+        $param['motivo_devolucion'] = $parametros['motivo_devolucion'];
+        $param['que_devolver'] = $parametros['que_devolver'];
+    
+    
+        if($param['que_devolver']==2){
+            // RCG Si se esta devolviendo un servicio se busca el ultimo servicio del cliente para ponerlo devuelto en el dietario
+            $lastDietario=$this->Dietario_model->leer([
+                'id_cliente'=>$param['id_cliente'],
+                'id_servicio'=>$param['id_servicio'],
+                'estado'=>'Pagado',
+                'devuelto'=>0
+            ]);
+            if($lastDietario>0){
+                $param['id_dietario']=$lastDietario[0]['id_dietario'];
+            }
+        }
+        else
+        if($param['que_devolver']==1){
+            $lastDietario=$this->Dietario_model->leer([
+                'id_cliente'=>$param['id_cliente'],
+                'id_producto'=>$param['id_producto'],
+                'estado'=>'Pagado',
+                'devuelto'=>0
+            ]);
+            if($lastDietario>0){
+                $param['id_dietario']=$lastDietario[0]['id_dietario'];
+            }
+        }
+        
+        return $param;
+    }
+    
+    private function _gestionarDevolucionCarnetYTemplos($parametros){
+        if (isset($parametros['id_carnet'])) {
+            if ($parametros['id_carnet'] > 0) {
+                unset($param4);
+                $param4['id_carnet'] = $parametros['id_carnet'];
+                $carnet_elegido = $this->Carnets_model->leer($param4);
+    
+                unset($param3);
+                $param3['id_carnet'] = $parametros['id_carnet'];
+                $param3['id_dietario'] = $id_dietario;
+                $param3['id_servicio'] = $param['id_servicio'];
+                $param3['id_cliente'] = $param['id_cliente'];
+                $param3['id_empleado'] = $this->session->userdata('id_usuario');
+                $param3['templos'] = $param['templos'] * -1;
+                $ok = $this->Carnets_model->anadir_historial($param3);
+    
+                // ... Modificamos los templos disponibles en el carnet.
+                unset($param5);
+                $param5['id_carnet'] = $parametros['id_carnet'];
+                $param5['templos_disponibles'] = ($carnet_elegido[0]['templos_disponibles'] + $param['templos']);
+                $param5['ajuste_automatico'] = 1;
+                $id = $this->Carnets_model->ajustes_templos($param5);
+            }
+        }
+    
+        // ... Devolucion a carnet espeacial
+        // Lo que se hace es crear otro servicio en el carnet.
+        if (isset($parametros['id_carnet_especial'])) {
+            if ($parametros['id_carnet_especial'] > 0) {
+                unset($servicio_carnet);
+    
+                $servicio_carnet['id_carnet'] = $parametros['id_carnet_especial'];
+                $servicio_carnet['id_servicio'] = $param['id_servicio'];
+    
+                unset($param_serv);
+                $param_serv['id_servicio'] = $param['id_servicio'];
+                $servicio = $this->Servicios_model->leer_servicios($param_serv);
+    
+                $servicio_carnet['id_cliente'] = $param['id_cliente'];
+                $servicio_carnet['pvp'] = $servicio[0]['pvp'];
+    
+                $id = $this->Carnets_model->anadir_servicio($servicio_carnet);
+            }
+        }
+    }
 }
-/*UPDATE dietario d
-JOIN presupuestos_items pi ON d.id_dietario = pi.id_dietario
-SET d.id_presupuesto = pi.id_presupuesto,
-    d.importe_euros = pi.coste
-WHERE pi.id_presupuesto > 0;*/

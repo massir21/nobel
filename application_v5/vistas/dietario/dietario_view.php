@@ -20,6 +20,7 @@
             <button class="m-1 btn btn-outline btn-outline-success" onclick="NuevoRecarga();">Recarga</button>
             */ ?>
             <button class="m-1 btn btn-secondary text-inverse-secondary " onclick="Devolucion();">Devolución</button>
+            <button class="m-1 btn btn-secondary text-inverse-secondary d-none" id="devolucion_conjunta" onclick="DevolucionConjunta();">Devolución conjunta</button>
             <button class="m-1 btn btn-outline btn-outline-info " onclick="PagoCuenta();" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-inverse" title="Realizar un pago a cuenta por el cliente">Pago a cuenta</button>
         </div>
 
@@ -330,6 +331,7 @@
                                                         <a href="#" class="btn btn-sm btn-icon btn-warning" onclick="javascript:DevolucionCarnet('<?php echo $row['id_dietario'] ?>');"><i class="fas fa-trash"></i></a>
                                                     <?php } elseif($row['tipo_pago'] != '#Presupuesto' && $row['devuelto'] == 0){ ?>
                                                         <a href="#" class="btn btn-sm btn-icon btn-warning" onclick="javascript:Devolucion('<?php echo $row['id_dietario'] ?>');"><i class="fas fa-trash"></i></a>
+                                                        <input name="devolucion_global" class="devolucion_global" type="checkbox" value="<?php echo $row['id_dietario'] ?>" />
                                                     <?php } ?>
 
 
@@ -527,6 +529,22 @@
         var url = "<?php echo base_url(); ?>dietario/devoluciones/index/0/" + id_dietario;
         openwindow('devolucion', url, 600, 450);
     }
+    
+    function DevolucionConjunta(){
+        
+        var valores = [];
+        $('.devolucion_global:checked').each(function() {
+           valores.push($(this).val());  // Agrega el valor del checkbox al array
+        });
+       
+        var url = "<?php echo base_url(); ?>dietario/devolucion_conjunta/listar/"+valores.join(':');
+        console.log(url);
+        openwindow('devolucion', url, 800, 600);
+    }
+    
+    jQuery(".devolucion_global").on("click", function(){
+        jQuery("#devolucion_conjunta").removeClass('d-none');
+    });
 
     function PagoCuenta() {
         var url = "<?php echo base_url(); ?>dietario/pago_a_cuenta";
@@ -607,6 +625,7 @@
         var url = "<?php echo base_url(); ?>agenda/citas/editar/" + id_cita;
         openwindow('citas_editar', url, 800, 620);
     }
+    
 </script>
 
 
