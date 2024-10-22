@@ -1272,7 +1272,7 @@ $sy = imagesy($estampa);
             unset($param);
             
             $parametros = $this->input->post();
-            $errorDevolucion=$this->_devolucionErrores($parametros); ;
+            $errorDevolucion=$this->_devolucionErrores($parametros);
             
             if( empty($errorDevolucion) ) {
                 
@@ -1345,7 +1345,7 @@ $sy = imagesy($estampa);
         }
     }
 
-    public function devolucion_conjunta($accion, $ids)
+    public function devolucion_conjunta($accion, $ids = '')
     {
         // ... Comprobamos la sesion del cliente
         $ok_ticket = $this->Ticket_model->recoger_ticket($this->session->userdata('ticket'));
@@ -1365,12 +1365,54 @@ $sy = imagesy($estampa);
             
             $data['lineas_devolucion'] = $lineas_devolucion;
         }
+        else
+        if ( $accion == 'realizar' ){
+            /*
+            $ids_dietarios = explode(':', $this->input->post('ids'));
+            
+            foreach ($ids_dietarios as $id_dietario){
+                
+               $dietario = $this->Dietario_model->leer(['id_dietario' => $id_dietario]);   
+               
+               unset($parametros);
+               $parametros = $dietario[0];
+               $parametros['que_devolver'] = $this->input->post('que_devolver_'.$id_dietario);
+               $parametros['forma_pago'] = $this->input->post('forma_pago_'.$id_dietario);
+               $parametros['importe_devolver'] = $this->input->post('importe_devolver_'.$id_dietario);
+               $parametros['motivo_devolucion'] = $this->input->post('motivo_devolucion');
+            
+               $errorDevolucion=$this->_devolucionErrores($parametros);
+               
+               if( empty($errorDevolucion) ) {
+                   
+                   unset($param);
+                   $param = $this->_prepararDevolucion($parametros);
+                   
+                   $id_dietario = $this->Dietario_model->devolucion($param);
+                   
+                   $this->_gestionarDevolucionCarnetYTemplos($parametros);
+                   
+                   $array[0] = $id_dietario;
+                   $id_ticket = $this->Dietario_model->CrearTicket($array, $parametros['id_cliente']);
+               }
+               else{
+                   // No se hace la devolución.
+                   $accion='error';
+                   unset($param5);
+                   $param5['id_cliente'] = $parametros['id_cliente'];
+                   $data['cliente_elegido'] = $this->Clientes_model->leer_clientes($param5);
+               }
+               
+            }
+            */
+        }
 
         // ... Modulos del cliente
         $param_modulos['id_perfil'] = $this->session->userdata('id_perfil');
         $data['modulos'] = $this->Usuarios_model->leer_modulos($param_modulos);
         $data['accion'] = $accion;
- 
+        $data['ids'] = $ids;
+
         // ... Pagina master
         $permiso = $this->Acceso_model->TienePermiso($data['modulos'], 14);
         if ($permiso) {
@@ -3551,6 +3593,7 @@ $sy = imagesy($estampa);
         }
         
         $saldo=$this->Clientes_model->saldo( $parametros['id_cliente']);
+        
         if($tipoDevolucion=='devolucion_acuenta'){
             if($saldo<=0){
                 $errorDevolucion='No se puede hacer la devolución, ya que el cliente no tiene saldo.';

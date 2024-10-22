@@ -15,11 +15,12 @@
     <?php
     }
     ?>
-
+    
+    <?php if ( $accion == 'listar'){ ?>
     <div class="card card-flush m-5">
         
         <div class="card-body p-5">
-            <form id="form_devolver" action="<?php echo base_url(); ?>dietario/devoluciones/realizar" role="form" method="post" name="form_devolver">
+            <form id="form_devolver" action="<?php echo base_url(); ?>dietario/devolucion_conjunta/realizar" role="form" method="post" name="form_devolver">
                 <div class="row">
                     <div class="col-3">
                         <strong>Cliente</strong>
@@ -52,12 +53,15 @@
                         
                         if($mostrarProducto){
                             echo ucfirst($dietario[0]['producto']);
+                            echo '<input type="hidden" name="que_devolver_'.$dietario[0]['id_dietario'].'" value="1" />';
                         }
                         if($mostrarServicio){
                             echo ucfirst($dietario[0]['servicio']);
+                            echo '<input type="hidden" name="que_devolver_'.$dietario[0]['id_dietario'].'" value="2" />';
                         }
                         if($mostrarSaldo){
                             echo 'Pago a cuenta';
+                            echo '<input type="hidden" name="que_devolver_'.$dietario[0]['id_dietario'].'" value="3" />';
                         }
                         ?>
                     </div>
@@ -102,197 +106,18 @@
                         </div>
                     </div>
                 </div>
+                <input type="hidden" name="ids" value="<?php echo $ids ?>" />
             </form>
         </div>
     </div>
-
+    <?php } ?>
+    
+    <?php if ($accion == "realizar") { ?>
     <script>
-
-        jQuery(document).ready(function(){
-            
-
-            jQuery("select[name=que_devolver]").on("change",function(){
-                jQuery("select[name=forma_pago] option").show();
-                var val=jQuery(this).val();
-                if(val==3){
-                    jQuery("select[name=forma_pago] option").each(function(){
-                        if(jQuery(this).val()=="#saldo_cuenta"){
-                            jQuery(this).hide();
-                        }
-                    });
-                    jQuery("input[name=importe_devolver]").val("").prop("max",null).attr("max",null);
-                }
-                else
-                if(val==2){
-                    getServicios(jQuery("select[name=id_cliente]").val());
-                }
-                else
-                if(val==1){
-                    getProductos(jQuery("select[name=id_cliente]").val());
-                }
-            });
-
-
-            <?php if ($accion == "realizar") { ?>
-            Cerrar();
-            <?php } ?>
-            Mostrar();
-            <?php
-            if(isset($original_param['forma_pago'])){
-            ?>
-            jQuery("select[name=forma_pago]").trigger('change');
-            <?php
-            }
-            ?>
-
-
-            <?php
-            if(isset($dietario) && $dietario[0]['id_servicio']>0){
-                ?>
-                jQuery("#id_servicio").trigger('change');
-
-                <?php
-            }
-            ?>
-            if(jQuery("select[name=que_devolver]").val()==3) {
-                jQuery("select[name=que_devolver]").trigger('change');
-            }
-        });
-
-        
-        function Mostrar() {
-            jQuery("#que_devolver").hide();
-            jQuery("#importe").show();
-            jQuery("#importe_en_euros").hide();
-            jQuery("#templos").hide();
-            jQuery("#carnets").hide();
-            jQuery("#especial").hide();
-            if(jQuery("#cliente").val()!=""){
-                jQuery("#que_devolver").show();
-            }
-            if (jQuery("#que_devolverId").val() == 1) {
-                jQuery("#producto").show();
-                jQuery("#servicio").hide();
-                jQuery("#importe_en_euros").show();
-                jQuery("#id_servicio").prop("disabled",true);
-                jQuery("#id_producto").prop("disabled",false);
-                jQuery("#importe_devolver").prop("disabled",false);
-                jQuery("#templos").prop("disabled",true);
-                jQuery("#id_carnet").prop("disabled",true);
-                jQuery("#id_carnet_especial").prop("disabled",true);
-                <?php if ($this->session->userdata('id_centro_usuario') == 9) { ?>
-                    document.form_devolver.forma_pago[4] = null;
-                <?php } else { ?>
-                    document.form_devolver.forma_pago[3] = null;
-                <?php } ?>
-            }
-            if (jQuery("#que_devolverId").val() == 2) {
-                jQuery("#producto").hide();
-                jQuery("#servicio").show();
-                jQuery("#id_servicio").prop("disabled",false);
-                jQuery("#id_producto").prop("disabled",true);
-                jQuery("#importe_devolver").prop("disabled",false);
-                jQuery("#templos").prop("disabled",false);
-                jQuery("#id_carnet").prop("disabled",false);
-                jQuery("#id_carnet_especial").prop("disabled",true);
-                <?php if ($this->session->userdata('id_centro_usuario') == 9) { ?>
-                    if (document.form_devolver.forma_pago.length < 5) {
-                        s = document.form_devolver.forma_pago;
-                        var option = document.createElement("option");
-                        option.value = "#templos"
-                        option.text = "Templos";
-                        s.appendChild(option);
-                    }
-                <?php } else { ?>
-                    if (document.form_devolver.forma_pago.length < 4) {
-                        s = document.form_devolver.forma_pago;
-                        var option = document.createElement("option");
-                        option.value = "#temque_devolverIdplos"
-                        option.text = "Templos";
-                        s.appendChild(option);
-                    }
-                <?php } ?>
-            }
-            if (jQuery("#que_devolverId").val() == 3) {
-                    jQuery("#producto").hide();
-                    jQuery("#servicio").hide();
-                    jQuery("#importe").show();
-                    jQuery("#id_servicio").prop("required",false);
-                    jQuery("#id_producto").prop("required",false);
-                    jQuery("#templos").prop("disabled",false);
-                    jQuery("#importe_devolver").prop("disabled",true);
-                    jQuery("#id_carnet").prop("disabled",true);
-                    jQuery("#id_carnet_especial").prop("disabled",true);
-                    jQuery("#importe_en_euros").hide();
-                    jQuery("#templos").hide();
-                    jQuery("#carnets").hide();
-            }
-
-            if (jQuery("#que_devolverId").val() == "") {
-                jQuery("#producto").hide();
-                jQuery("#servicio").hide();
-                jQuery("#importe").hide();
-                jQuery("#id_servicio").prop("disabled",true);
-                jQuery("#id_producto").prop("disabled",true);
-                jQuery("#templos").prop("disabled",true);
-                jQuery("#importe_devolver").prop("disabled",true);
-                jQuery("#id_carnet").prop("disabled",true);
-                jQuery("#id_carnet_especial").prop("disabled",true);
-                jQuery("#importe_en_euros").hide();
-                jQuery("#templos").hide();
-                jQuery("#carnets").hide();
-            }
-        }
-
-        function PrecioProducto(datos) {
-            var res = datos.split("|");
-            document.form_devolver.importe_devolver.value = res[1];
-        }
-
-        function PrecioServicio(datos) {
-           /* var res = datos.split("|");
-            document.form_devolver.importe_devolver.value = res[1];
-            document.form_devolver.templos.value = res[2]; */
-        }
-
-        function FormaPago(valor) {
-            if (valor == "#templos") {
-                document.getElementById("importe_en_euros").style.display = "none";
-                document.getElementById("templos").style.display = "block";
-                document.getElementById("carnets").style.display = "block";
-                document.form_devolver.importe_devolver.disabled = true;
-                document.form_devolver.templos.disabled = false;
-                document.form_devolver.id_carnet.disabled = false;
-                document.getElementById("especial").style.display = "none";
-                document.form_devolver.id_carnet_especial.disabled = true;
-            } else if (valor == "#especial") {
-                document.getElementById("importe_en_euros").style.display = "none";
-                document.getElementById("templos").style.display = "none";
-                document.getElementById("carnets").style.display = "none";
-                document.form_devolver.importe_devolver.disabled = true;
-                document.form_devolver.templos.disabled = true;
-                document.form_devolver.id_carnet.disabled = true;
-                document.getElementById("especial").style.display = "block";
-                document.form_devolver.id_carnet_especial.disabled = false;
-                document.form_devolver.id_carnet_especial.value = <?php echo $id_carnet_especial; ?>;
-            } else {
-                document.getElementById("importe_en_euros").style.display = "block";
-                document.getElementById("templos").style.display = "none";
-                document.getElementById("carnets").style.display = "none";
-                document.form_devolver.importe_devolver.disabled = false;
-                document.form_devolver.templos.disabled = true;
-                document.form_devolver.id_carnet.disabled = true;
-                document.getElementById("especial").style.display = "none";
-                document.form_devolver.id_carnet_especial.disabled = true;
-            }
-        }
-
-        function Cerrar() {
-            window.opener.location.reload();
-            window.close();
-        }
-
+        window.opener.location.reload();
+        window.close();
     </script>
+    <?php } ?>  
 </body>
 
-</html>
+<?php echo '</html>';
