@@ -1,7 +1,7 @@
 <?php
 
-require '/var/www/vhosts/clinicadentalnobel.es/extranet.clinicadentalnobel.es/recursos/motorPDF/vendor/autoload.php';
-
+//require '/var/www/vhosts/clinicadentalnobel.es/extranet.clinicadentalnobel.es/recursos/motorPDF/vendor/autoload.php';
+require RUTA_SERVIDOR."/recursos/motorPDF/vendor/autoload.php";
 use Twilio\Rest\Client;
 
 
@@ -159,8 +159,9 @@ class EvaluacionesGoogle extends CI_Controller
         $id_frecuenciaEnvio = $this->input->post('id_frecuenciaEnvio');
         $esta_activo = $this->input->post('esta_activo') ? 1 : 0;
         $mensaje_personalizado = $this->input->post('mensaje_personalizado');
+        $norepetirDias=$this->input->post('no_repetir_dias');
 
-        $this->EvaluacionesGoogle_model->update_ajustes($id_frecuenciaEnvio, $esta_activo, $mensaje_personalizado);
+        $this->EvaluacionesGoogle_model->update_ajustes($id_frecuenciaEnvio, $esta_activo, $mensaje_personalizado,$norepetirDias);
 
         redirect('EvaluacionesGoogle/ajustes');
     }

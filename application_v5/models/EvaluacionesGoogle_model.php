@@ -1,5 +1,8 @@
 <?php
 
+/* CHAINS 20240917 - ALTER TABLE `frecuencia_envio_evaluacion_google` ADD `no_repetir_dias` INT NOT NULL DEFAULT '90' AFTER `mensaje_personalizado`;
+ *
+ */
 class EvaluacionesGoogle_model extends CI_Model
 {
 
@@ -107,17 +110,19 @@ class EvaluacionesGoogle_model extends CI_Model
 
     public function tipo_recordatorio(): array
     {
-        $this->db->select('id_frecuenciaEnvio, esta_activo, mensaje_personalizado');
+        $this->db->select('id_frecuenciaEnvio, esta_activo, mensaje_personalizado,no_repetir_dias');
         $this->db->from('frecuencia_envio_evaluacion_google');
         $query = $this->db->get();
         return $query->result_array();
     }
 
-    public function update_ajustes(int $id_frecuenciaEnvio, bool $esta_activo, string $mensaje_personalizado): void
+    public function update_ajustes(int $id_frecuenciaEnvio, bool $esta_activo, string $mensaje_personalizado,
+                                int $norepetirdias=90): void
     {
         $data = [
             'esta_activo' => $esta_activo,
-            'mensaje_personalizado' => $mensaje_personalizado
+            'mensaje_personalizado' => $mensaje_personalizado,
+            'no_repetir_dias'=>$norepetirdias
         ];
 
         $this->db->where('id_frecuenciaEnvio', $id_frecuenciaEnvio);
@@ -158,10 +163,41 @@ class EvaluacionesGoogle_model extends CI_Model
         return $count == 0;
     }
 
+    // CHAINS 20240918
+    private function cumpleLimiteTemporalMaximo($id_cliente): bool
+    {
+        // return true;
+
+        $max=0;
+        $recordatorio=$this->tipo_recordatorio();
+        if($recordatorio){
+            $max=$recordatorio[0]['no_repetir_dias'];
+        }
+
+        $now = new DateTime();
+
+        $toleranceStart = clone $now;
+        $toleranceStart->modify('-'.$max.' days');
+
+
+        $this->db->select('estado, tipo_pago, id_cita, id_centro');
+        $this->db->from('evaluacion_google');
+        $this->db->join('citas','citas.id_cita = evaluacion_google.id_cita');
+        $this->db->where('citas.id_cliente', $id_cliente);
+        $this->db->where_in('evaluacion_google.estatus',['Enviado','Programado para envio']);
+        $this->db->where('evaluacion_google.fecha_hora_envio >=', $toleranceStart->format('Y-m-d H:i:s'));
+        $count = $this->db->count_all_results();
+
+        return $count == 0;
+    }
+
+
+
+
 
     public function dietarioPagado(int $id_dietario): void
     {
-        $this->db->select('estado, tipo_pago, id_cita, id_centro');
+        $this->db->select('estado, tipo_pago, id_cita, id_centro,id_cliente');
         $this->db->from('dietario');
         $this->db->where('id_dietario', $id_dietario);
         $query = $this->db->get();
@@ -170,9 +206,12 @@ class EvaluacionesGoogle_model extends CI_Model
         if ($query->num_rows() > 0) {
             $dietario = $query->row();
 
-            if (!empty($dietario->id_cita)) {
+            if (!empty($dietario->id_cita) && !empty($dietario->id_cliente)) {
                 // Verificar si se puede insertar la notificación con el estado en pagado y que no sea saldo_cuenta
-                if ($dietario->estado == 'Pagado'  && $this->puede_insertar_notificacion($id_dietario)  && $this->noExisteEvaluacionGoogle($dietario->id_cita)) {
+                if ($dietario->estado == 'Pagado'  && $this->puede_insertar_notificacion($id_dietario)  && $this->noExisteEvaluacionGoogle($dietario->id_cita)
+                        // CHAINS 20240918
+                        && $this->cumpleLimiteTemporalMaximo($dietario->id_cliente)
+                    ) {
                     $data_notificacion = array(
                         'id_cita' => $dietario->id_cita,
                         'estatus' => 'Programado para envio',
